@@ -1,9 +1,9 @@
 package main
 
 import (
-	"shop-api/internal/app"
+	"shop-api/internal/api"
 )
 
 func main() {
-	app.RunApp()
+	api.Run()
 }
