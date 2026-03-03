@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"log"
@@ -8,7 +8,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func main() {
+func RunApp() {
 	r := chi.NewRouter()
 
 	r.Use(middleware.Logger)
