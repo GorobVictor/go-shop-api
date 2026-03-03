@@ -1,0 +1,16 @@
+services:
+  shop-api-debug:
+    container_name: shop-api-debug
+    build:
+      context: ./src
+      dockerfile: Dockerfile.debug
+    working_dir: /app
+    volumes:
+      - ./src:/app
+    ports:
+      - "3000:3000"
+      - "2345:2345"
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
