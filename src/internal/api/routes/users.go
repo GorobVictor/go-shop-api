@@ -1,54 +1,65 @@
 package routes
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
-	"shop-api/internal/db"
-	"strconv"
+	"shop-api/internal/usecase/user"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func Users(r *chi.Mux) {
-	r.Get("/api/users/{userID}", getById)
+	r.Route("/api/users", func(r chi.Router) {
+		r.Post("/signin", signIn)
+		r.Post("/signup", signUp)
+	})
 }
 
-// GetUser godoc
-// @Summary Get user
+// Sign In
+// @Summary Sign in
 // @Tags users
-// @Param id path int true "User ID"
-// @Router /users/{id} [get]
-func getById(w http.ResponseWriter, r *http.Request) {
-	ctx := context.Background()
+// @Param user body user.SignInDto true "User details for login"
+// @Success 200 {object} user.TokenDto
+// @Router /users/signin [post]
+func signIn(w http.ResponseWriter, r *http.Request) {
 
-	conn, err := pgxpool.New(ctx, "user=shop_user password=shop_password dbname=shop_db sslmode=disable host=postgres port=5432")
+	var model user.SignInDto
+	if err := json.NewDecoder(r.Body).Decode(&model); err != nil {
+		http.Error(w, "Invalid JSON", 400)
+		return
+	}
 
-	returnError(w, err)
+	user, err := user.SignIn(model)
 
-	defer conn.Close()
+	if err != nil {
+		w.Write([]byte(err.Error()))
 
-	q := db.New(conn)
+		return
+	}
 
-	userID, err := strconv.ParseInt(chi.URLParam(r, "userID"), 0, 64)
-
-	returnError(w, err)
-
-	user, err := q.GetUser(ctx, userID)
-
-	returnError(w, err)
-
-	json, err := json.Marshal(user)
-
-	returnError(w, err)
-
-	w.Write(json)
+	json.NewEncoder(w).Encode(user)
 }
 
-func returnError(w http.ResponseWriter, err error) {
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+// Sign Up
+// @Summary Sign Up
+// @Tags users
+// @Param user body user.SignUpDto true "User details for registration"
+// @Success 200 {object} user.TokenDto
+// @Router /users/signup [post]
+func signUp(w http.ResponseWriter, r *http.Request) {
+	var model user.SignUpDto
+	if err := json.NewDecoder(r.Body).Decode(&model); err != nil {
+		http.Error(w, "Invalid JSON", 400)
+		return
 	}
+
+	user, err := user.SignUp(model)
+
+	if err != nil {
+		w.Write([]byte(err.Error()))
+
+		return
+	}
+
+	json.NewEncoder(w).Encode(user)
 }
