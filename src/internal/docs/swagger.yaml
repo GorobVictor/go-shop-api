@@ -1,20 +1,72 @@
 basePath: /api
+definitions:
+  user.SignInDto:
+    properties:
+      email:
+        example: test@test.com
+        type: string
+      password:
+        example: test123
+        type: string
+    type: object
+  user.SignUpDto:
+    properties:
+      email:
+        example: test@test.com
+        type: string
+      firstName:
+        example: John
+        type: string
+      lastName:
+        example: Wick
+        type: string
+      password:
+        example: test123
+        type: string
+    type: object
+  user.TokenDto:
+    properties:
+      token:
+        type: string
+    type: object
 info:
   contact: {}
   description: Swagger for Shop Api
   title: Shop Api
   version: "1.0"
 paths:
-  /users/{id}:
-    get:
+  /users/signin:
+    post:
       parameters:
-      - description: User ID
-        in: path
-        name: id
+      - description: User details for login
+        in: body
+        name: user
         required: true
-        type: integer
-      responses: {}
-      summary: Get user
+        schema:
+          $ref: '#/definitions/user.SignInDto'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.TokenDto'
+      summary: Sign in
+      tags:
+      - users
+  /users/signup:
+    post:
+      parameters:
+      - description: User details for registration
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user.SignUpDto'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.TokenDto'
+      summary: Sign Up
       tags:
       - users
 swagger: "2.0"

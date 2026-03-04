@@ -8,22 +8,102 @@
     },
     "basePath": "/api",
     "paths": {
-        "/users/{id}": {
-            "get": {
+        "/users/signin": {
+            "post": {
                 "tags": [
                     "users"
                 ],
-                "summary": "Get user",
+                "summary": "Sign in",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
+                        "description": "User details for login",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.SignInDto"
+                        }
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.TokenDto"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/signup": {
+            "post": {
+                "tags": [
+                    "users"
+                ],
+                "summary": "Sign Up",
+                "parameters": [
+                    {
+                        "description": "User details for registration",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.SignUpDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.TokenDto"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "user.SignInDto": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "test@test.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "test123"
+                }
+            }
+        },
+        "user.SignUpDto": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "test@test.com"
+                },
+                "firstName": {
+                    "type": "string",
+                    "example": "John"
+                },
+                "lastName": {
+                    "type": "string",
+                    "example": "Wick"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "test123"
+                }
+            }
+        },
+        "user.TokenDto": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
             }
         }
     }
