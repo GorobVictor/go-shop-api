@@ -1,0 +1,14 @@
+version: "2"
+servers:
+- engine: postgresql
+  uri: "postgres://shop_user:shop_password@localhost:5432/shop_db?sslmode=disable"
+sql:
+  - engine: "postgresql"
+    queries: "query.sql"
+    schema: "schema.sql"
+    database:
+      managed: true
+    gen:
+      go:
+        out: "../db"
+        sql_package: "pgx/v5"
