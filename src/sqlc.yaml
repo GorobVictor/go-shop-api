@@ -4,11 +4,11 @@ servers:
   uri: "postgres://shop_user:shop_password@localhost:5432/shop_db?sslmode=disable"
 sql:
   - engine: "postgresql"
-    queries: "query.sql"
-    schema: "schema.sql"
+    queries: "proto/db/query.sql"
+    schema: "proto/db/schema.sql"
     database:
       managed: true
     gen:
       go:
-        out: "../db"
+        out: "generated/db"
         sql_package: "pgx/v5"
