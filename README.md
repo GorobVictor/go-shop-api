@@ -7,6 +7,22 @@ Commands:
 swag init -g cmd/main.go -o internal/docs
 ```
 
+## Release (Docker)
+
+Build and run release stack (app + postgres):
+```bash
+docker compose up --build -d
+```
+
+Stop release stack:
+```bash
+docker compose down
+```
+
+Release files:
+- `src/Dockerfile` - production image (multi-stage, distroless)
+- `docker-compose.yml` - release compose (without debug)
+
 ## Debug in Docker (VS Code)
 
 1. Open this repository in VS Code.
