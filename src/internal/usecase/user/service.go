@@ -84,6 +84,42 @@ func SignUp(model SignUpDto) (TokenDto, error) {
 	return TokenDto{"test token"}, nil
 }
 
+func GetProfile() (ProfileDto, error) {
+	// ctx, conn, err := database.GetConnection()
+
+	// if err != nil {
+	// 	return ProfileDto{}, err
+	// }
+
+	// defer conn.Close()
+
+	// q := db.New(conn)
+
+	// email, err := q.AnyEmail(ctx, model.Email)
+
+	// log.Println(email)
+
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// 	if err.Error() != "no rows in result set" {
+	// 		return TokenDto{}, errors.New("Email already exists")
+	// 	}
+	// }
+	// if email != "" && err == nil {
+	// 	return TokenDto{}, errors.New("Email already exists")
+	// }
+
+	// user, err := q.CreateUser(ctx, db.CreateUserParams{FirstName: model.FirstName, LastName: model.LastName, Email: model.Email, PasswordHash: passHash})
+
+	// if err != nil {
+	// 	return TokenDto{}, err
+	// }
+
+	// log.Println(user)
+
+	return ProfileDto{}, nil
+}
+
 // SignIdDto represents the request body for sign in a user
 type SignInDto struct {
 	Email    string `json:"email" example:"test@test.com"`
@@ -96,6 +132,12 @@ type SignUpDto struct {
 	LastName  string `json:"lastName" example:"Wick"`
 	Email     string `json:"email" example:"test@test.com"`
 	Password  string `json:"password" example:"test123"`
+}
+
+type ProfileDto struct {
+	FirstName string `json:"firstName" example:"John"`
+	LastName  string `json:"lastName" example:"Wick"`
+	Email     string `json:"email" example:"test@test.com"`
 }
 
 // Token model
