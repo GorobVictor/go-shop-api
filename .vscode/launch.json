@@ -6,7 +6,8 @@
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/src/cmd"
+      "program": "${workspaceFolder}/src/cmd",
+      "envFile": "${workspaceFolder}/.env"
     },
     {
       "name": "Go: Attach to Docker (auto up/down)",
