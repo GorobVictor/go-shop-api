@@ -6,7 +6,6 @@ CREATE TABLE users (
     last_name TEXT NOT NULL,
     email CITEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
-    clerk_id TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
