@@ -3,10 +3,7 @@ package api
 import (
 	"log"
 	"net/http"
-	"os"
-	"shop-api/internal/api/routes"
 
-	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
@@ -14,13 +11,6 @@ import (
 )
 
 func Run() {
-	clerkConnStr := os.Getenv("CLERK_KEY")
-
-	if clerkConnStr == "" {
-		log.Fatal("clerk connection string is empty")
-	}
-
-	clerk.SetKey(clerkConnStr)
 
 	r := chi.NewRouter()
 
@@ -28,8 +18,6 @@ func Run() {
 	r.Use(middleware.Recoverer)
 
 	initSwagger(r)
-
-	routes.Users(r, clerkConnStr)
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Welcome!"))

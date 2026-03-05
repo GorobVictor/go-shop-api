@@ -73,7 +73,13 @@ func SignUp(model SignUpDto) (TokenDto, error) {
 		return TokenDto{}, errors.New("Email already exists")
 	}
 
-	user, err := q.CreateUser(ctx, db.CreateUserParams{FirstName: model.FirstName, LastName: model.LastName, Email: model.Email, PasswordHash: passHash})
+	if err != nil {
+		return TokenDto{}, err
+	}
+
+	user, err := q.CreateUser(ctx, db.CreateUserParams{
+		FirstName: model.FirstName, LastName: model.LastName, Email: model.Email, PasswordHash: passHash,
+	})
 
 	if err != nil {
 		return TokenDto{}, err
