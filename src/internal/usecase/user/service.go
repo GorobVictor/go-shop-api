@@ -1,19 +1,16 @@
 package user
 
 import (
-	"context"
 	"errors"
 	"log"
 	"shop-api/generated/db"
+	"shop-api/internal/database"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func SignIn(model SignInDto) (TokenDto, error) {
-	ctx := context.Background()
-
-	conn, err := pgxpool.New(ctx, "user=shop_user password=shop_password dbname=shop_db sslmode=disable host=postgres port=5432")
+	ctx, conn, err := database.GetConnection()
 
 	if err != nil {
 		return TokenDto{}, err
@@ -24,6 +21,13 @@ func SignIn(model SignInDto) (TokenDto, error) {
 	q := db.New(conn)
 
 	user, err := q.GetUserByEmail(ctx, model.Email)
+
+	if err != nil {
+		log.Println(err.Error())
+		if err.Error() == "no rows in result set" {
+			return TokenDto{}, errors.New("incorrect email")
+		}
+	}
 
 	if !checkPasswordHash(model.Password, user.PasswordHash) {
 		return TokenDto{}, errors.New("incorrect password")
@@ -39,9 +43,7 @@ func SignIn(model SignInDto) (TokenDto, error) {
 }
 
 func SignUp(model SignUpDto) (TokenDto, error) {
-	ctx := context.Background()
-
-	conn, err := pgxpool.New(ctx, "user=shop_user password=shop_password dbname=shop_db sslmode=disable host=postgres port=5432")
+	ctx, conn, err := database.GetConnection()
 
 	if err != nil {
 		return TokenDto{}, err
