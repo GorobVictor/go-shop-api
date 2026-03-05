@@ -1,5 +1,17 @@
 basePath: /api
 definitions:
+  user.ProfileDto:
+    properties:
+      email:
+        example: test@test.com
+        type: string
+      firstName:
+        example: John
+        type: string
+      lastName:
+        example: Wick
+        type: string
+    type: object
   user.SignInDto:
     properties:
       email:
@@ -35,6 +47,16 @@ info:
   title: Shop Api
   version: "1.0"
 paths:
+  /users/me:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.ProfileDto'
+      summary: Get my profile
+      tags:
+      - users
   /users/signin:
     post:
       parameters:

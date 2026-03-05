@@ -15,6 +15,22 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/users/me": {
+            "get": {
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get my profile",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.ProfileDto"
+                        }
+                    }
+                }
+            }
+        },
         "/users/signin": {
             "post": {
                 "tags": [
@@ -71,6 +87,23 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "user.ProfileDto": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "test@test.com"
+                },
+                "firstName": {
+                    "type": "string",
+                    "example": "John"
+                },
+                "lastName": {
+                    "type": "string",
+                    "example": "Wick"
+                }
+            }
+        },
         "user.SignInDto": {
             "type": "object",
             "properties": {
