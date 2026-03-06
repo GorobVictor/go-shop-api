@@ -8,16 +8,14 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func GetConnection() (context.Context, *pgxpool.Pool, error) {
+func GetConnection() (*pgxpool.Pool, error) {
 	connStr := os.Getenv("POSTGRES_CONN_STR")
 
 	if connStr == "" {
 		log.Fatal("connection string is empty")
 	}
 
-	ctx := context.Background()
+	conn, err := pgxpool.New(context.Background(), connStr)
 
-	conn, err := pgxpool.New(ctx, connStr)
-
-	return ctx, conn, err
+	return conn, err
 }

@@ -1,42 +1,33 @@
 package user
 
 import (
+	"context"
 	"errors"
-	"log"
 	"shop-api/generated/db"
-	"shop-api/internal/database"
+	"shop-api/internal/database/repositories"
 	"time"
 
 	"github.com/go-chi/jwtauth"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func SignIn(model SignInDto, tokenAuth *jwtauth.JWTAuth) (TokenDto, error) {
-	ctx, conn, err := database.GetConnection()
+type UserService struct {
+	userRepo *repositories.UserRepository
+}
+
+func NewUserService(userRepo *repositories.UserRepository) *UserService {
+	return &UserService{userRepo}
+}
+
+func (s *UserService) SignIn(ctx context.Context, model SignInDto, tokenAuth *jwtauth.JWTAuth) (TokenDto, error) {
+	user, err := s.userRepo.GetUserByEmail(ctx, model.Email)
 
 	if err != nil {
 		return TokenDto{}, err
-	}
-
-	defer conn.Close()
-
-	q := db.New(conn)
-
-	user, err := q.GetUserByEmail(ctx, model.Email)
-
-	if err != nil {
-		log.Println(err.Error())
-		if err.Error() == "no rows in result set" {
-			return TokenDto{}, errors.New("incorrect email")
-		}
 	}
 
 	if !checkPasswordHash(model.Password, user.PasswordHash) {
 		return TokenDto{}, errors.New("incorrect password")
-	}
-
-	if err != nil {
-		return TokenDto{}, err
 	}
 
 	token, err := generateToken(user, tokenAuth)
@@ -44,35 +35,20 @@ func SignIn(model SignInDto, tokenAuth *jwtauth.JWTAuth) (TokenDto, error) {
 	return TokenDto{token}, err
 }
 
-func SignUp(model SignUpDto, tokenAuth *jwtauth.JWTAuth) (TokenDto, error) {
-	ctx, conn, err := database.GetConnection()
-
-	if err != nil {
-		return TokenDto{}, err
-	}
-
-	defer conn.Close()
-
-	q := db.New(conn)
-
+func (s *UserService) SignUp(ctx context.Context, model SignUpDto, tokenAuth *jwtauth.JWTAuth) (TokenDto, error) {
 	passHash, err := hashPassword(model.Password)
 
 	if err != nil {
 		return TokenDto{}, err
 	}
 
-	email, err := q.AnyEmail(ctx, model.Email)
-
-	log.Println(email)
+	err = s.userRepo.AnyEmail(ctx, model.Email)
 
 	if err != nil {
-		log.Println(err.Error())
-		if err.Error() != "no rows in result set" {
-			return TokenDto{}, errors.New("Email already exists")
-		}
+		return TokenDto{}, err
 	}
 
-	user, err := q.CreateUser(ctx, db.CreateUserParams{
+	user, err := s.userRepo.CreateUser(ctx, db.CreateUserParams{
 		FirstName: model.FirstName, LastName: model.LastName, Email: model.Email, PasswordHash: passHash, UserRole: db.RoleMember,
 	})
 
@@ -85,34 +61,16 @@ func SignUp(model SignUpDto, tokenAuth *jwtauth.JWTAuth) (TokenDto, error) {
 	return TokenDto{token}, err
 }
 
-func GetProfile(id int64) (ProfileDto, error) {
-	ctx, conn, err := database.GetConnection()
+func (s *UserService) GetProfile(ctx context.Context, id int64) (ProfileDto, error) {
 
-	if err != nil {
-		return ProfileDto{}, err
-	}
-
-	defer conn.Close()
-
-	q := db.New(conn)
-
-	user, err := q.GetUserProfile(ctx, id)
+	user, err := s.userRepo.GetUserProfile(ctx, id)
 
 	return ProfileDto{ID: user.ID, FirstName: user.FirstName, LastName: user.LastName, Email: user.Email, UserRole: user.UserRole, CreatedAt: user.CreatedAt.Time}, err
 }
 
-func GetUsers(limit int64, offset int64) (result []ProfileDto, err error) {
-	ctx, conn, err := database.GetConnection()
+func (s *UserService) GetUsers(ctx context.Context, limit int64, offset int64) (result []ProfileDto, err error) {
 
-	if err != nil {
-		return []ProfileDto{}, err
-	}
-
-	defer conn.Close()
-
-	q := db.New(conn)
-
-	users, err := q.GetUsers(ctx, db.GetUsersParams{Limit: limit, Offset: offset})
+	users, err := s.userRepo.GetUsers(ctx, limit, offset)
 
 	for _, user := range users {
 		result = append(result, ProfileDto{ID: user.ID, FirstName: user.FirstName, LastName: user.LastName, Email: user.Email, UserRole: user.UserRole, CreatedAt: user.CreatedAt.Time})

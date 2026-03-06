@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"shop-api/internal/usecase/user"
@@ -10,26 +11,31 @@ import (
 	"github.com/go-chi/jwtauth"
 )
 
-func Users(r *chi.Mux, tokenAuth *jwtauth.JWTAuth) {
+type UserHandler struct {
+	userSvc   *user.UserService
+	tokenAuth *jwtauth.JWTAuth
+}
+
+func NewUserHandler(userSvc *user.UserService, tokenAuth *jwtauth.JWTAuth) *UserHandler {
+	return &UserHandler{userSvc: userSvc, tokenAuth: tokenAuth}
+}
+
+func (h *UserHandler) Users(r *chi.Mux) {
 	r.Route("/api/users", func(r chi.Router) {
-		r.Post("/signin", func(w http.ResponseWriter, r *http.Request) {
-			signIn(w, r, tokenAuth)
-		})
-		r.Post("/signup", func(w http.ResponseWriter, r *http.Request) {
-			signUp(w, r, tokenAuth)
-		})
+		r.Post("/signin", h.signIn)
+		r.Post("/signup", h.signUp)
 
 		r.Group(func(r chi.Router) {
-			r.Use(jwtauth.Verifier(tokenAuth))
+			r.Use(jwtauth.Verifier(h.tokenAuth))
 			r.Use(jwtauth.Authenticator)
-			r.Get("/me", me)
+			r.Get("/me", h.me)
 		})
 
 		r.Group(func(r chi.Router) {
-			r.Use(jwtauth.Verifier(tokenAuth))
+			r.Use(jwtauth.Verifier(h.tokenAuth))
 			r.Use(jwtauth.Authenticator)
 			r.Use(GetAdminMiddleware)
-			r.Get("/get", getUsers)
+			r.Get("/get", h.getUsers)
 		})
 	})
 }
@@ -40,15 +46,14 @@ func Users(r *chi.Mux, tokenAuth *jwtauth.JWTAuth) {
 // @Param user body user.SignInDto true "User details for login"
 // @Success 200 {object} user.TokenDto
 // @Router /users/signin [post]
-func signIn(w http.ResponseWriter, r *http.Request, tokenAuth *jwtauth.JWTAuth) {
-
+func (h *UserHandler) signIn(w http.ResponseWriter, r *http.Request) {
 	var model user.SignInDto
 	if err := json.NewDecoder(r.Body).Decode(&model); err != nil {
 		http.Error(w, "Invalid JSON", 400)
 		return
 	}
 
-	user, err := user.SignIn(model, tokenAuth)
+	user, err := h.userSvc.SignIn(context.Background(), model, h.tokenAuth)
 
 	if err != nil {
 		w.Write([]byte(err.Error()))
@@ -65,14 +70,14 @@ func signIn(w http.ResponseWriter, r *http.Request, tokenAuth *jwtauth.JWTAuth) 
 // @Param user body user.SignUpDto true "User details for registration"
 // @Success 200 {object} user.TokenDto
 // @Router /users/signup [post]
-func signUp(w http.ResponseWriter, r *http.Request, tokenAuth *jwtauth.JWTAuth) {
+func (h *UserHandler) signUp(w http.ResponseWriter, r *http.Request) {
 	var model user.SignUpDto
 	if err := json.NewDecoder(r.Body).Decode(&model); err != nil {
 		http.Error(w, "Invalid JSON", 400)
 		return
 	}
 
-	user, err := user.SignUp(model, tokenAuth)
+	user, err := h.userSvc.SignUp(context.Background(), model, h.tokenAuth)
 
 	if err != nil {
 		w.Write([]byte(err.Error()))
@@ -89,11 +94,11 @@ func signUp(w http.ResponseWriter, r *http.Request, tokenAuth *jwtauth.JWTAuth) 
 // @Security ApiKeyAuth
 // @Success 200 {object} user.ProfileDto
 // @Router /users/me [get]
-func me(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) me(w http.ResponseWriter, r *http.Request) {
 
 	userId := GetUserId(w, r)
 
-	user, err := user.GetProfile(userId)
+	user, err := h.userSvc.GetProfile(context.Background(), userId)
 
 	if err != nil {
 		w.Write([]byte(err.Error()))
@@ -112,7 +117,7 @@ func me(w http.ResponseWriter, r *http.Request) {
 // @Param limit query int true "Limit"
 // @Param offset query int true "Offset"
 // @Router /users/get [get]
-func getUsers(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) getUsers(w http.ResponseWriter, r *http.Request) {
 	queries := r.URL.Query()
 	limit, err := strconv.ParseInt(queries.Get("limit"), 10, 64)
 	if err != nil {
@@ -123,7 +128,7 @@ func getUsers(w http.ResponseWriter, r *http.Request) {
 		writeBadRequest(w, err)
 	}
 
-	result, err := user.GetUsers(limit, offset)
+	result, err := h.userSvc.GetUsers(context.Background(), limit, offset)
 
 	if err != nil {
 		w.Write([]byte(err.Error()))
