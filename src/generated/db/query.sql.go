@@ -7,6 +7,8 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const anyEmail = `-- name: AnyEmail :one
@@ -89,4 +91,76 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.CreatedAt,
 	)
 	return i, err
+}
+
+const getUserProfile = `-- name: GetUserProfile :one
+SELECT ID, first_name, last_name, email, user_role, created_at FROM users WHERE id = $1 limit 1
+`
+
+type GetUserProfileRow struct {
+	ID        int64
+	FirstName string
+	LastName  string
+	Email     string
+	UserRole  Role
+	CreatedAt pgtype.Timestamptz
+}
+
+func (q *Queries) GetUserProfile(ctx context.Context, id int64) (GetUserProfileRow, error) {
+	row := q.db.QueryRow(ctx, getUserProfile, id)
+	var i GetUserProfileRow
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.UserRole,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getUsers = `-- name: GetUsers :many
+Select ID, first_name, last_name, email, user_role, created_at from users order by id limit $1 offset $2
+`
+
+type GetUsersParams struct {
+	Limit  int64
+	Offset int64
+}
+
+type GetUsersRow struct {
+	ID        int64
+	FirstName string
+	LastName  string
+	Email     string
+	UserRole  Role
+	CreatedAt pgtype.Timestamptz
+}
+
+func (q *Queries) GetUsers(ctx context.Context, arg GetUsersParams) ([]GetUsersRow, error) {
+	rows, err := q.db.Query(ctx, getUsers, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetUsersRow
+	for rows.Next() {
+		var i GetUsersRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.UserRole,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
