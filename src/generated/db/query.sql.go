@@ -7,6 +7,8 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const anyEmail = `-- name: AnyEmail :one
@@ -20,8 +22,8 @@ func (q *Queries) AnyEmail(ctx context.Context, email string) (string, error) {
 }
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO public.users(first_name, last_name, email, password_hash)
-	VALUES ($1, $2, $3, $4) RETURNING id, first_name, last_name, email, password_hash, created_at
+INSERT INTO public.users(first_name, last_name, email, password_hash, user_role)
+	VALUES ($1, $2, $3, $4, $5) RETURNING id, first_name, last_name, email, password_hash, user_role, created_at
 `
 
 type CreateUserParams struct {
@@ -29,6 +31,7 @@ type CreateUserParams struct {
 	LastName     string
 	Email        string
 	PasswordHash string
+	UserRole     Role
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -37,6 +40,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.LastName,
 		arg.Email,
 		arg.PasswordHash,
+		arg.UserRole,
 	)
 	var i User
 	err := row.Scan(
@@ -45,13 +49,14 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.LastName,
 		&i.Email,
 		&i.PasswordHash,
+		&i.UserRole,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, first_name, last_name, email, password_hash, created_at FROM users WHERE id = $1 limit 1
+SELECT id, first_name, last_name, email, password_hash, user_role, created_at FROM users WHERE id = $1 limit 1
 `
 
 func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
@@ -63,13 +68,14 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
 		&i.LastName,
 		&i.Email,
 		&i.PasswordHash,
+		&i.UserRole,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, first_name, last_name, email, password_hash, created_at FROM users WHERE email = $1 limit 1
+SELECT id, first_name, last_name, email, password_hash, user_role, created_at FROM users WHERE email = $1 limit 1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
@@ -81,7 +87,80 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.LastName,
 		&i.Email,
 		&i.PasswordHash,
+		&i.UserRole,
 		&i.CreatedAt,
 	)
 	return i, err
+}
+
+const getUserProfile = `-- name: GetUserProfile :one
+SELECT ID, first_name, last_name, email, user_role, created_at FROM users WHERE id = $1 limit 1
+`
+
+type GetUserProfileRow struct {
+	ID        int64
+	FirstName string
+	LastName  string
+	Email     string
+	UserRole  Role
+	CreatedAt pgtype.Timestamptz
+}
+
+func (q *Queries) GetUserProfile(ctx context.Context, id int64) (GetUserProfileRow, error) {
+	row := q.db.QueryRow(ctx, getUserProfile, id)
+	var i GetUserProfileRow
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.UserRole,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getUsers = `-- name: GetUsers :many
+Select ID, first_name, last_name, email, user_role, created_at from users order by id limit $1 offset $2
+`
+
+type GetUsersParams struct {
+	Limit  int64
+	Offset int64
+}
+
+type GetUsersRow struct {
+	ID        int64
+	FirstName string
+	LastName  string
+	Email     string
+	UserRole  Role
+	CreatedAt pgtype.Timestamptz
+}
+
+func (q *Queries) GetUsers(ctx context.Context, arg GetUsersParams) ([]GetUsersRow, error) {
+	rows, err := q.db.Query(ctx, getUsers, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetUsersRow
+	for rows.Next() {
+		var i GetUsersRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.UserRole,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

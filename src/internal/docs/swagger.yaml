@@ -1,16 +1,33 @@
 basePath: /api
 definitions:
+  db.Role:
+    enum:
+    - member
+    - admin
+    type: string
+    x-enum-varnames:
+    - RoleMember
+    - RoleAdmin
   user.ProfileDto:
     properties:
+      createdAt:
+        type: string
       email:
         example: test@test.com
         type: string
       firstName:
         example: John
         type: string
+      id:
+        format: int64
+        type: integer
       lastName:
         example: Wick
         type: string
+      userRole:
+        allOf:
+        - $ref: '#/definitions/db.Role'
+        example: member
     type: object
   user.SignInDto:
     properties:
@@ -47,6 +64,31 @@ info:
   title: Shop Api
   version: "1.0"
 paths:
+  /users/get:
+    get:
+      parameters:
+      - description: Limit
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/user.ProfileDto'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: Get my profile
+      tags:
+      - users
   /users/me:
     get:
       responses:
@@ -54,6 +96,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/user.ProfileDto'
+      security:
+      - ApiKeyAuth: []
       summary: Get my profile
       tags:
       - users
@@ -91,4 +135,10 @@ paths:
       summary: Sign Up
       tags:
       - users
+securityDefinitions:
+  ApiKeyAuth:
+    description: Type "Bearer" followed by a space and then your token.
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

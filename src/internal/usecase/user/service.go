@@ -5,11 +5,13 @@ import (
 	"log"
 	"shop-api/generated/db"
 	"shop-api/internal/database"
+	"time"
 
+	"github.com/go-chi/jwtauth"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func SignIn(model SignInDto) (TokenDto, error) {
+func SignIn(model SignInDto, tokenAuth *jwtauth.JWTAuth) (TokenDto, error) {
 	ctx, conn, err := database.GetConnection()
 
 	if err != nil {
@@ -37,12 +39,12 @@ func SignIn(model SignInDto) (TokenDto, error) {
 		return TokenDto{}, err
 	}
 
-	log.Println(user)
+	token, err := generateToken(user, tokenAuth)
 
-	return TokenDto{"test token"}, nil
+	return TokenDto{token}, err
 }
 
-func SignUp(model SignUpDto) (TokenDto, error) {
+func SignUp(model SignUpDto, tokenAuth *jwtauth.JWTAuth) (TokenDto, error) {
 	ctx, conn, err := database.GetConnection()
 
 	if err != nil {
@@ -69,61 +71,63 @@ func SignUp(model SignUpDto) (TokenDto, error) {
 			return TokenDto{}, errors.New("Email already exists")
 		}
 	}
-	if email != "" && err == nil {
-		return TokenDto{}, errors.New("Email already exists")
-	}
-
-	if err != nil {
-		return TokenDto{}, err
-	}
 
 	user, err := q.CreateUser(ctx, db.CreateUserParams{
-		FirstName: model.FirstName, LastName: model.LastName, Email: model.Email, PasswordHash: passHash,
+		FirstName: model.FirstName, LastName: model.LastName, Email: model.Email, PasswordHash: passHash, UserRole: db.RoleMember,
 	})
 
 	if err != nil {
 		return TokenDto{}, err
 	}
 
-	log.Println(user)
+	token, err := generateToken(user, tokenAuth)
 
-	return TokenDto{"test token"}, nil
+	return TokenDto{token}, err
 }
 
-func GetProfile() (ProfileDto, error) {
-	// ctx, conn, err := database.GetConnection()
+func GetProfile(id int64) (ProfileDto, error) {
+	ctx, conn, err := database.GetConnection()
 
-	// if err != nil {
-	// 	return ProfileDto{}, err
-	// }
+	if err != nil {
+		return ProfileDto{}, err
+	}
 
-	// defer conn.Close()
+	defer conn.Close()
 
-	// q := db.New(conn)
+	q := db.New(conn)
 
-	// email, err := q.AnyEmail(ctx, model.Email)
+	user, err := q.GetUserProfile(ctx, id)
 
-	// log.Println(email)
+	return ProfileDto{ID: user.ID, FirstName: user.FirstName, LastName: user.LastName, Email: user.Email, UserRole: user.UserRole, CreatedAt: user.CreatedAt.Time}, err
+}
 
-	// if err != nil {
-	// 	log.Println(err.Error())
-	// 	if err.Error() != "no rows in result set" {
-	// 		return TokenDto{}, errors.New("Email already exists")
-	// 	}
-	// }
-	// if email != "" && err == nil {
-	// 	return TokenDto{}, errors.New("Email already exists")
-	// }
+func GetUsers(limit int64, offset int64) (result []ProfileDto, err error) {
+	ctx, conn, err := database.GetConnection()
 
-	// user, err := q.CreateUser(ctx, db.CreateUserParams{FirstName: model.FirstName, LastName: model.LastName, Email: model.Email, PasswordHash: passHash})
+	if err != nil {
+		return []ProfileDto{}, err
+	}
 
-	// if err != nil {
-	// 	return TokenDto{}, err
-	// }
+	defer conn.Close()
 
-	// log.Println(user)
+	q := db.New(conn)
 
-	return ProfileDto{}, nil
+	users, err := q.GetUsers(ctx, db.GetUsersParams{Limit: limit, Offset: offset})
+
+	for _, user := range users {
+		result = append(result, ProfileDto{ID: user.ID, FirstName: user.FirstName, LastName: user.LastName, Email: user.Email, UserRole: user.UserRole, CreatedAt: user.CreatedAt.Time})
+	}
+
+	return result, err
+}
+
+func generateToken(user db.User, tokenAuth *jwtauth.JWTAuth) (token string, err error) {
+	_, token, err = tokenAuth.Encode(map[string]interface{}{
+		"user_id":   user.ID,
+		"user_role": user.UserRole,
+	})
+
+	return token, err
 }
 
 // SignIdDto represents the request body for sign in a user
@@ -141,9 +145,12 @@ type SignUpDto struct {
 }
 
 type ProfileDto struct {
-	FirstName string `json:"firstName" example:"John"`
-	LastName  string `json:"lastName" example:"Wick"`
-	Email     string `json:"email" example:"test@test.com"`
+	ID        int64
+	FirstName string    `json:"firstName" example:"John"`
+	LastName  string    `json:"lastName" example:"Wick"`
+	Email     string    `json:"email" example:"test@test.com"`
+	UserRole  db.Role   `json:"userRole" example:"member"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 // Token model
