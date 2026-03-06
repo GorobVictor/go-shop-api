@@ -15,8 +15,53 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/users/get": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get my profile",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/user.ProfileDto"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/users/me": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "tags": [
                     "users"
                 ],
@@ -87,9 +132,23 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "db.Role": {
+            "type": "string",
+            "enum": [
+                "member",
+                "admin"
+            ],
+            "x-enum-varnames": [
+                "RoleMember",
+                "RoleAdmin"
+            ]
+        },
         "user.ProfileDto": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
                 "email": {
                     "type": "string",
                     "example": "test@test.com"
@@ -98,9 +157,21 @@ const docTemplate = `{
                     "type": "string",
                     "example": "John"
                 },
+                "id": {
+                    "type": "integer",
+                    "format": "int64"
+                },
                 "lastName": {
                     "type": "string",
                     "example": "Wick"
+                },
+                "userRole": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/db.Role"
+                        }
+                    ],
+                    "example": "member"
                 }
             }
         },
@@ -145,6 +216,14 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "description": "Type \"Bearer\" followed by a space and then your token.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`
