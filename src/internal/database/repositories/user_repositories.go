@@ -64,9 +64,13 @@ func (r *UserRepository) AnyEmail(ctx context.Context, email string) error {
 	email, err := q.AnyEmail(ctx, email)
 
 	if err != nil {
-		if err.Error() != "no rows in result set" {
+		if err.Error() == "no rows in result set" {
 			return nil
 		}
+	}
+
+	if err == nil {
+		return errors.New("Email already exists")
 	}
 
 	return err
