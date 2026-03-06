@@ -78,7 +78,7 @@ func SignUp(model SignUpDto) (TokenDto, error) {
 	}
 
 	user, err := q.CreateUser(ctx, db.CreateUserParams{
-		FirstName: model.FirstName, LastName: model.LastName, Email: model.Email, PasswordHash: passHash,
+		FirstName: model.FirstName, LastName: model.LastName, Email: model.Email, PasswordHash: passHash, UserRole: db.RoleMember,
 	})
 
 	if err != nil {

@@ -20,8 +20,8 @@ func (q *Queries) AnyEmail(ctx context.Context, email string) (string, error) {
 }
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO public.users(first_name, last_name, email, password_hash)
-	VALUES ($1, $2, $3, $4) RETURNING id, first_name, last_name, email, password_hash, created_at
+INSERT INTO public.users(first_name, last_name, email, password_hash, user_role)
+	VALUES ($1, $2, $3, $4, $5) RETURNING id, first_name, last_name, email, password_hash, user_role, created_at
 `
 
 type CreateUserParams struct {
@@ -29,6 +29,7 @@ type CreateUserParams struct {
 	LastName     string
 	Email        string
 	PasswordHash string
+	UserRole     Role
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -37,6 +38,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.LastName,
 		arg.Email,
 		arg.PasswordHash,
+		arg.UserRole,
 	)
 	var i User
 	err := row.Scan(
@@ -45,13 +47,14 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.LastName,
 		&i.Email,
 		&i.PasswordHash,
+		&i.UserRole,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, first_name, last_name, email, password_hash, created_at FROM users WHERE id = $1 limit 1
+SELECT id, first_name, last_name, email, password_hash, user_role, created_at FROM users WHERE id = $1 limit 1
 `
 
 func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
@@ -63,13 +66,14 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
 		&i.LastName,
 		&i.Email,
 		&i.PasswordHash,
+		&i.UserRole,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, first_name, last_name, email, password_hash, created_at FROM users WHERE email = $1 limit 1
+SELECT id, first_name, last_name, email, password_hash, user_role, created_at FROM users WHERE email = $1 limit 1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
@@ -81,6 +85,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.LastName,
 		&i.Email,
 		&i.PasswordHash,
+		&i.UserRole,
 		&i.CreatedAt,
 	)
 	return i, err
