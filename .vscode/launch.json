@@ -25,44 +25,6 @@
       "runtimeArgs": ["run", "dev"],
       "cwd": "${workspaceFolder}/fe-src",
       "console": "integratedTerminal"
-    },
-    {
-      "name": "Go: Attach to Docker (auto up/down)",
-      "type": "go",
-      "debugAdapter": "legacy",
-      "request": "attach",
-      "mode": "remote",
-      "host": "127.0.0.1",
-      "port": 2345,
-      "apiVersion": 2,
-      "remotePath": "/app",
-      "cwd": "${workspaceFolder}/src",
-      "substitutePath": [
-        {
-          "from": "${workspaceFolder}/src",
-          "to": "/app"
-        }
-      ],
-      "preLaunchTask": "docker: debug up",
-      "postDebugTask": "docker: debug down"
-    },
-    {
-      "name": "Go: Attach to Docker (manual)",
-      "type": "go",
-      "debugAdapter": "legacy",
-      "request": "attach",
-      "mode": "remote",
-      "host": "127.0.0.1",
-      "port": 2345,
-      "apiVersion": 2,
-      "remotePath": "/app",
-      "cwd": "${workspaceFolder}/src",
-      "substitutePath": [
-        {
-          "from": "${workspaceFolder}/src",
-          "to": "/app"
-        }
-      ]
     }
   ],
   "compounds": [
