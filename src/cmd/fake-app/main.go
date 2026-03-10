@@ -21,7 +21,7 @@ func main() {
 	userRepo := repositories.NewUserRepository(conn)
 	productRepo := repositories.NewProductRepository(conn)
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 1000; i++ {
 		userRepo.CreateUser(context.Background(), db.CreateUserParams{
 			FirstName:    gofakeit.FirstName(),
 			LastName:     gofakeit.LastName(),
@@ -33,7 +33,7 @@ func main() {
 
 	fakeImage := pgtype.Text{String: "https://upload.wikimedia.org/wikipedia/commons/0/05/Go_Logo_Blue.svg", Valid: true}
 
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 100000; i++ {
 		prod := gofakeit.Product()
 		productRepo.CreateProduct(context.Background(), db.CreateProductParams{
 			Name:        prod.Name,
