@@ -64,3 +64,8 @@ migrate:
 ```bash
 pgroll migrate ./proto/db/migrations --postgres-url "postgres://test:test@localhost:5432/shop_db?sslmode=disable"
 ```
+
+rollback:
+```bash
+pgroll rollback --postgres-url "postgres://test:test@localhost:5432/shop_db?sslmode=disable"
+```
