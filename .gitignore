@@ -16,3 +16,4 @@
 __debug_*
 
 *.env
+*.DS_Store

@@ -10,6 +10,15 @@
       "envFile": "${workspaceFolder}/.env"
     },
     {
+      "name": "Frontend: dev",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "${workspaceFolder}/fe-src",
+      "console": "integratedTerminal"
+    },
+    {
       "name": "Go: Attach to Docker (auto up/down)",
       "type": "go",
       "debugAdapter": "legacy",
@@ -46,6 +55,12 @@
           "to": "/app"
         }
       ]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Go + Frontend (local)",
+      "configurations": ["Go: Launch (local)", "Frontend: dev"]
     }
   ]
 }
