@@ -24,7 +24,7 @@ func (r *UserRepository) GetUserProfile(ctx context.Context, id int64) (db.GetUs
 	if err != nil {
 		log.Println(err.Error())
 		if err.Error() == "no rows in result set" {
-			return user, errors.New("incorrect email")
+			return user, errors.New("wrong user id")
 		}
 	}
 
@@ -38,7 +38,7 @@ func (r *UserRepository) GetUsers(ctx context.Context, limit int32, offset int32
 	if err != nil {
 		log.Println(err.Error())
 		if err.Error() == "no rows in result set" {
-			return users, errors.New("incorrect email")
+			return users, nil
 		}
 	}
 
