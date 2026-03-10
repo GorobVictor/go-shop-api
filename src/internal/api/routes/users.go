@@ -113,7 +113,7 @@ func (h *UserHandler) me(w http.ResponseWriter, r *http.Request) {
 // @Summary Get my profile
 // @Tags users
 // @Security ApiKeyAuth
-// @Success 200 {object} []user.ProfileDto
+// @Success 200 {object} user.UsersPaginationDto
 // @Param limit query int true "Limit"
 // @Param offset query int true "Offset"
 // @Router /users/get [get]

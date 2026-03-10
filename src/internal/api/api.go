@@ -7,6 +7,7 @@ import (
 	"shop-api/internal/api/routes"
 	"shop-api/internal/database"
 	"shop-api/internal/database/repositories"
+	"shop-api/internal/usecase/product"
 	"shop-api/internal/usecase/user"
 
 	"github.com/go-chi/chi/v5"
@@ -34,8 +35,13 @@ func Run() {
 	tokenAuth := jwtauth.New("HS256", []byte(secret), nil)
 
 	userRepo := repositories.NewUserRepository(conn)
+	productRepo := repositories.NewProductRepository(conn)
+
 	userSvc := user.NewUserService(userRepo)
+	productSvc := product.NewProductService(productRepo)
+
 	userHandler := routes.NewUserHandler(userSvc, tokenAuth)
+	productHandler := routes.NewProductHandler(productSvc, tokenAuth)
 
 	r := chi.NewRouter()
 
@@ -59,6 +65,7 @@ func Run() {
 	})
 
 	userHandler.Users(r)
+	productHandler.Products(r)
 
 	log.Println("Server starting on port :3000")
 	log.Fatalln(http.ListenAndServe(":3000", r))

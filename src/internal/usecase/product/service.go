@@ -32,6 +32,34 @@ func (s *ProductService) CreateProduct(ctx context.Context, product CreateProduc
 	return NewProductDto(result), nil
 }
 
+func (s *ProductService) GetProducts(ctx context.Context, limit int32, offset int32) (result ProductsPaginationDto, err error) {
+	result.Limit = limit
+	result.Offset = offset
+
+	result.Total, err = s.productRepo.CountProducts(ctx)
+	if err != nil {
+		return result, err
+	}
+
+	products, err := s.productRepo.GetProducts(ctx, limit, offset)
+	if err != nil {
+		return result, err
+	}
+
+	for _, product := range products {
+		result.Products = append(result.Products, NewProductDto(product))
+	}
+
+	return result, nil
+}
+
+type ProductsPaginationDto struct {
+	Products []ProductDto `json:"products"`
+	Total    int64        `json:"total"`
+	Limit    int32        `json:"limit"`
+	Offset   int32        `json:"offset"`
+}
+
 type CreateProductDto struct {
 	Name        string `json:"name"`
 	Price       int64  `json:"price"`
