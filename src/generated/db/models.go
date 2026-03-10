@@ -56,8 +56,8 @@ func (ns NullRole) Value() (driver.Value, error) {
 type Product struct {
 	ID          int64
 	Name        string
-	Price       pgtype.Numeric
-	Discount    pgtype.Numeric
+	Price       int64
+	Discount    int64
 	Description pgtype.Text
 	Image       pgtype.Text
 	CreatedAt   pgtype.Timestamptz
@@ -66,8 +66,8 @@ type Product struct {
 type Receipt struct {
 	ID          int64
 	UserID      int64
-	SumPrice    pgtype.Numeric
-	SumDiscount pgtype.Numeric
+	SumPrice    int64
+	SumDiscount int64
 	CreatedAt   pgtype.Timestamptz
 }
 
@@ -75,8 +75,8 @@ type ReceiptProduct struct {
 	ReceiptID int64
 	ProductID int64
 	Quantity  int32
-	Price     pgtype.Numeric
-	Discount  pgtype.Numeric
+	Price     int64
+	Discount  int64
 }
 
 type User struct {
