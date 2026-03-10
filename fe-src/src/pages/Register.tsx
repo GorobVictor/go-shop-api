@@ -37,10 +37,10 @@ export default function Register() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>Реєстрація</CardTitle>
+    <div className="relative flex min-h-[calc(100vh-3.5rem)] items-center justify-center bg-gradient-to-b from-accent/30 to-background px-4 py-12">
+      <Card className="w-full max-w-sm rounded-2xl border-border/80 shadow-xl">
+        <CardHeader className="space-y-1 text-center">
+          <CardTitle className="text-2xl">Реєстрація</CardTitle>
           <CardDescription>
             Створіть акаунт, заповнивши форму нижче
           </CardDescription>
@@ -48,7 +48,7 @@ export default function Register() {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             {error && (
-              <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+              <div className="rounded-lg bg-destructive/10 px-3 py-2.5 text-sm text-destructive">
                 {error}
               </div>
             )}
@@ -62,6 +62,7 @@ export default function Register() {
                   onChange={(e) => setFirstName(e.target.value)}
                   required
                   autoComplete="given-name"
+                  className="rounded-lg"
                 />
               </div>
               <div className="space-y-2">
@@ -73,6 +74,7 @@ export default function Register() {
                   onChange={(e) => setLastName(e.target.value)}
                   required
                   autoComplete="family-name"
+                  className="rounded-lg"
                 />
               </div>
             </div>
@@ -86,6 +88,7 @@ export default function Register() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
+                className="rounded-lg"
               />
             </div>
             <div className="space-y-2">
@@ -97,16 +100,24 @@ export default function Register() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 autoComplete="new-password"
+                className="rounded-lg"
               />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Реєстрація..." : "Зареєструватися"}
+            <Button
+              type="submit"
+              className="w-full rounded-lg"
+              disabled={loading}
+            >
+              {loading ? "Реєстрація…" : "Зареєструватися"}
             </Button>
             <p className="text-center text-sm text-muted-foreground">
               Вже є акаунт?{" "}
-              <Link to="/login" className="text-primary underline-offset-4 hover:underline">
+              <Link
+                to="/login"
+                className="font-medium text-primary underline-offset-4 hover:underline"
+              >
                 Увійти
               </Link>
             </p>
