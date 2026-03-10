@@ -8,6 +8,47 @@ definitions:
     x-enum-varnames:
     - RoleMember
     - RoleAdmin
+  product.CreateProductDto:
+    properties:
+      description:
+        type: string
+      discount:
+        type: integer
+      image:
+        type: string
+      name:
+        type: string
+      price:
+        type: integer
+    type: object
+  product.ProductDto:
+    properties:
+      description:
+        type: string
+      discount:
+        type: integer
+      id:
+        type: integer
+      image:
+        type: string
+      name:
+        type: string
+      price:
+        type: integer
+    type: object
+  product.ProductsPaginationDto:
+    properties:
+      limit:
+        type: integer
+      offset:
+        type: integer
+      total:
+        type: integer
+      users:
+        items:
+          $ref: '#/definitions/product.ProductDto'
+        type: array
+    type: object
   user.ProfileDto:
     properties:
       createdAt:
@@ -58,12 +99,67 @@ definitions:
       token:
         type: string
     type: object
+  user.UsersPaginationDto:
+    properties:
+      limit:
+        type: integer
+      offset:
+        type: integer
+      total:
+        type: integer
+      users:
+        items:
+          $ref: '#/definitions/user.ProfileDto'
+        type: array
+    type: object
 info:
   contact: {}
   description: Swagger for Shop Api
   title: Shop Api
   version: "1.0"
 paths:
+  /products/create:
+    post:
+      parameters:
+      - description: Product details
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/product.CreateProductDto'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/product.ProductDto'
+      security:
+      - ApiKeyAuth: []
+      summary: Create Product
+      tags:
+      - products
+  /products/get:
+    get:
+      parameters:
+      - description: Limit
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/product.ProductsPaginationDto'
+      security:
+      - ApiKeyAuth: []
+      summary: Get Products
+      tags:
+      - products
   /users/get:
     get:
       parameters:
@@ -81,9 +177,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/user.ProfileDto'
-            type: array
+            $ref: '#/definitions/user.UsersPaginationDto'
       security:
       - ApiKeyAuth: []
       summary: Get my profile
