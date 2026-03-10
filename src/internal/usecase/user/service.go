@@ -68,7 +68,7 @@ func (s *UserService) GetProfile(ctx context.Context, id int64) (ProfileDto, err
 	return ProfileDto{ID: user.ID, FirstName: user.FirstName, LastName: user.LastName, Email: user.Email, UserRole: user.UserRole, CreatedAt: user.CreatedAt.Time}, err
 }
 
-func (s *UserService) GetUsers(ctx context.Context, limit int64, offset int64) (result []ProfileDto, err error) {
+func (s *UserService) GetUsers(ctx context.Context, limit int32, offset int32) (result []ProfileDto, err error) {
 
 	users, err := s.userRepo.GetUsers(ctx, limit, offset)
 

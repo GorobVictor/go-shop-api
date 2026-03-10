@@ -1,10 +1,3 @@
-CREATE EXTENSION IF NOT EXISTS citext;
-
-CREATE TYPE role AS ENUM(
-    'member',
-    'admin'
-);
-
 CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
     first_name TEXT NOT NULL,

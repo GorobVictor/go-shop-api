@@ -5,9 +5,7 @@ servers:
 sql:
   - engine: "postgresql"
     queries: "proto/db/queries"
-    schema: "proto/db/schema.sql"
-    database:
-      managed: true
+    schema: "proto/db/schemas"
     gen:
       go:
         out: "generated/db"

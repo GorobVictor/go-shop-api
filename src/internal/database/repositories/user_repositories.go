@@ -31,7 +31,7 @@ func (r *UserRepository) GetUserProfile(ctx context.Context, id int64) (db.GetUs
 	return user, err
 }
 
-func (r *UserRepository) GetUsers(ctx context.Context, limit int64, offset int64) ([]db.GetUsersRow, error) {
+func (r *UserRepository) GetUsers(ctx context.Context, limit int32, offset int32) ([]db.GetUsersRow, error) {
 	q := db.New(r.db)
 	users, err := q.GetUsers(ctx, db.GetUsersParams{Limit: limit, Offset: offset})
 

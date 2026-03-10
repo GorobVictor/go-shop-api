@@ -1,0 +1,134 @@
+operations:
+- create_table:
+    columns:
+    - name: id
+      pk: true
+      type: bigserial
+    - name: first_name
+      type: text
+    - name: last_name
+      type: text
+    - name: email
+      type: citext
+      unique: true
+    - name: password_hash
+      type: text
+    - name: user_role
+      type: role
+    - default: now()
+      name: created_at
+      type: timestamptz
+    name: users
+- create_table:
+    columns:
+    - name: id
+      pk: true
+      type: bigserial
+    - name: name
+      type: text
+    - check:
+        constraint: price >= 0
+        name: products_price_check
+      name: price
+      type: numeric(12, 2)
+    - check:
+        constraint: discount >= 0 AND discount <= price
+        name: products_discount_check
+      default: "0"
+      name: discount
+      type: numeric(12, 2)
+    - name: description
+      nullable: true
+      type: text
+    - name: image
+      nullable: true
+      type: text
+    - default: now()
+      name: created_at
+      type: timestamptz
+    name: products
+- create_table:
+    columns:
+    - name: id
+      pk: true
+      type: bigserial
+    - name: user_id
+      references:
+        column: id
+        match_type: SIMPLE
+        name: receipts_user_id_fkey
+        on_delete: CASCADE
+        on_update: NO ACTION
+        table: users
+      type: bigint
+    - check:
+        constraint: sum_price >= 0
+        name: receipts_sum_price_check
+      name: sum_price
+      type: numeric(12, 2)
+    - check:
+        constraint: sum_discount >= 0 AND sum_discount <= sum_price
+        name: receipts_sum_discount_check
+      default: "0"
+      name: sum_discount
+      type: numeric(12, 2)
+    - default: now()
+      name: created_at
+      type: timestamptz
+    name: receipts
+- create_table:
+    columns:
+    - name: receipt_id
+      references:
+        column: id
+        match_type: SIMPLE
+        name: receipt_products_receipt_id_fkey
+        on_delete: CASCADE
+        on_update: NO ACTION
+        table: receipts
+      type: bigint
+    - name: product_id
+      references:
+        column: id
+        match_type: SIMPLE
+        name: receipt_products_product_id_fkey
+        on_delete: RESTRICT
+        on_update: NO ACTION
+        table: products
+      type: bigint
+    - check:
+        constraint: quantity > 0
+        name: receipt_products_quantity_check
+      default: "1"
+      name: quantity
+      type: int
+    - check:
+        constraint: price >= 0
+        name: receipt_products_price_check
+      name: price
+      type: numeric(12, 2)
+    - check:
+        constraint: discount >= 0 AND discount <= price
+        name: receipt_products_discount_check
+      default: "0"
+      name: discount
+      type: numeric(12, 2)
+    constraints:
+    - columns:
+      - receipt_id
+      - product_id
+      name: receipt_products_pkey
+      type: primary_key
+    name: receipt_products
+- create_index:
+    columns:
+    - column: user_id
+    method: btree
+    name: idx_receipts_user_id
+    table: receipts
+- create_index:
+    columns:
+    - column: product_id
+    method: btree
+    name: idx_receipt_products_product_id
+    table: receipt_products

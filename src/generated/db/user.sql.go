@@ -125,8 +125,8 @@ Select ID, first_name, last_name, email, user_role, created_at from users order 
 `
 
 type GetUsersParams struct {
-	Limit  int64
-	Offset int64
+	Limit  int32
+	Offset int32
 }
 
 type GetUsersRow struct {

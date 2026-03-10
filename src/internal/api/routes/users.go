@@ -119,7 +119,7 @@ func (h *UserHandler) me(w http.ResponseWriter, r *http.Request) {
 // @Router /users/get [get]
 func (h *UserHandler) getUsers(w http.ResponseWriter, r *http.Request) {
 	queries := r.URL.Query()
-	limit, err := strconv.ParseInt(queries.Get("limit"), 10, 64)
+	limit, err := strconv.ParseInt(queries.Get("limit"), 10, 32)
 	if err != nil {
 		writeBadRequest(w, err)
 	}
@@ -128,7 +128,7 @@ func (h *UserHandler) getUsers(w http.ResponseWriter, r *http.Request) {
 		writeBadRequest(w, err)
 	}
 
-	result, err := h.userSvc.GetUsers(context.Background(), limit, offset)
+	result, err := h.userSvc.GetUsers(context.Background(), int32(limit), int32(offset))
 
 	if err != nil {
 		w.Write([]byte(err.Error()))

@@ -47,3 +47,20 @@ Postgres in debug compose:
 - User: `shop_user`
 - Password: `shop_password`
 - Compose will create the `postgres` container and `postgres_data` volume automatically if they do not exist.
+
+## pgroll
+
+init:
+```bash
+pgroll init --postgres-url "postgres://test:test@localhost:5432/shop_db?sslmode=disable"
+```
+
+convert file:
+```bash
+pgroll convert ./proto/db/schemas/001_initial.sql > ./proto/db/migrations/001_initial.yml
+```
+
+migrate:
+```bash
+pgroll migrate ./proto/db/migrations --postgres-url "postgres://test:test@localhost:5432/shop_db?sslmode=disable"
+```

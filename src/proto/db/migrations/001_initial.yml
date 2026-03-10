@@ -1,0 +1,4 @@
+operations:
+- sql:
+    up: CREATE EXTENSION IF NOT EXISTS citext; CREATE TYPE role AS ENUM('member', 'admin');
+    down: DROP EXTENSION IF EXISTS citext; DROP TYPE IF EXISTS role;
