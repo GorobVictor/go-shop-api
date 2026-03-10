@@ -4,7 +4,7 @@ servers:
   uri: "postgres://shop_user:shop_password@localhost:5432/shop_db?sslmode=disable"
 sql:
   - engine: "postgresql"
-    queries: "proto/db/query.sql"
+    queries: "proto/db/queries"
     schema: "proto/db/schema.sql"
     database:
       managed: true
