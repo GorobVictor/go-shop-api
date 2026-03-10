@@ -45,6 +45,11 @@ func (r *UserRepository) GetUsers(ctx context.Context, limit int32, offset int32
 	return users, err
 }
 
+func (r *UserRepository) CountUsers(ctx context.Context) (int64, error) {
+	q := db.New(r.db)
+	return q.CountUsers(ctx)
+}
+
 func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (db.User, error) {
 	q := db.New(r.db)
 	user, err := q.GetUserByEmail(ctx, email)

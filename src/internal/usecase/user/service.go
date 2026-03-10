@@ -68,12 +68,20 @@ func (s *UserService) GetProfile(ctx context.Context, id int64) (ProfileDto, err
 	return ProfileDto{ID: user.ID, FirstName: user.FirstName, LastName: user.LastName, Email: user.Email, UserRole: user.UserRole, CreatedAt: user.CreatedAt.Time}, err
 }
 
-func (s *UserService) GetUsers(ctx context.Context, limit int32, offset int32) (result []ProfileDto, err error) {
+func (s *UserService) GetUsers(ctx context.Context, limit int32, offset int32) (result UsersPaginationDto, err error) {
+	result.Limit = limit
+	result.Offset = offset
+
+	result.Total, err = s.userRepo.CountUsers(ctx)
+
+	if err != nil {
+		return result, err
+	}
 
 	users, err := s.userRepo.GetUsers(ctx, limit, offset)
 
 	for _, user := range users {
-		result = append(result, ProfileDto{ID: user.ID, FirstName: user.FirstName, LastName: user.LastName, Email: user.Email, UserRole: user.UserRole, CreatedAt: user.CreatedAt.Time})
+		result.Users = append(result.Users, ProfileDto{ID: user.ID, FirstName: user.FirstName, LastName: user.LastName, Email: user.Email, UserRole: user.UserRole, CreatedAt: user.CreatedAt.Time})
 	}
 
 	return result, err
@@ -92,6 +100,13 @@ func generateToken(user db.User, tokenAuth *jwtauth.JWTAuth) (token string, err 
 type SignInDto struct {
 	Email    string `json:"email" example:"test@test.com"`
 	Password string `json:"password" example:"test123"`
+}
+
+type UsersPaginationDto struct {
+	Users  []ProfileDto `json:"users"`
+	Total  int64        `json:"total"`
+	Limit  int32        `json:"limit"`
+	Offset int32        `json:"offset"`
 }
 
 // SignUpDto represents the request body for sign up a user

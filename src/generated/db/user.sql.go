@@ -21,6 +21,17 @@ func (q *Queries) AnyEmail(ctx context.Context, email string) (string, error) {
 	return email, err
 }
 
+const countUsers = `-- name: CountUsers :one
+Select count(*) from users
+`
+
+func (q *Queries) CountUsers(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countUsers)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createUser = `-- name: CreateUser :one
 INSERT INTO public.users(first_name, last_name, email, password_hash, user_role)
 	VALUES ($1, $2, $3, $4, $5) RETURNING id, first_name, last_name, email, password_hash, user_role, created_at
