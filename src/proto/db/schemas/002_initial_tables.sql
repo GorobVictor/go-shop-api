@@ -11,8 +11,8 @@ CREATE TABLE users (
 CREATE TABLE products (
     id BIGSERIAL PRIMARY KEY,
     name TEXT NOT NULL,
-    price NUMERIC(12, 2) NOT NULL CHECK (price >= 0),
-    discount NUMERIC(12, 2) NOT NULL DEFAULT 0 CHECK (
+    price BIGINT NOT NULL CHECK (price >= 0),
+    discount BIGINT NOT NULL DEFAULT 0 CHECK (
         discount >= 0
         AND discount <= price
     ),
@@ -24,8 +24,8 @@ CREATE TABLE products (
 CREATE TABLE receipts (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-    sum_price NUMERIC(12, 2) NOT NULL CHECK (sum_price >= 0),
-    sum_discount NUMERIC(12, 2) NOT NULL DEFAULT 0 CHECK (
+    sum_price BIGINT NOT NULL CHECK (sum_price >= 0),
+    sum_discount BIGINT NOT NULL DEFAULT 0 CHECK (
         sum_discount >= 0
         AND sum_discount <= sum_price
     ),
@@ -36,8 +36,8 @@ CREATE TABLE receipt_products (
     receipt_id BIGINT NOT NULL REFERENCES receipts (id) ON DELETE CASCADE,
     product_id BIGINT NOT NULL REFERENCES products (id) ON DELETE RESTRICT,
     quantity INT NOT NULL DEFAULT 1 CHECK (quantity > 0),
-    price NUMERIC(12, 2) NOT NULL CHECK (price >= 0),
-    discount NUMERIC(12, 2) NOT NULL DEFAULT 0 CHECK (
+    price BIGINT NOT NULL CHECK (price >= 0),
+    discount BIGINT NOT NULL DEFAULT 0 CHECK (
         discount >= 0
         AND discount <= price
     ),

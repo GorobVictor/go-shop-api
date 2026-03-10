@@ -30,13 +30,13 @@ operations:
         constraint: price >= 0
         name: products_price_check
       name: price
-      type: numeric(12, 2)
+      type: bigint
     - check:
         constraint: discount >= 0 AND discount <= price
         name: products_discount_check
       default: "0"
       name: discount
-      type: numeric(12, 2)
+      type: bigint
     - name: description
       nullable: true
       type: text
@@ -65,13 +65,13 @@ operations:
         constraint: sum_price >= 0
         name: receipts_sum_price_check
       name: sum_price
-      type: numeric(12, 2)
+      type: bigint
     - check:
         constraint: sum_discount >= 0 AND sum_discount <= sum_price
         name: receipts_sum_discount_check
       default: "0"
       name: sum_discount
-      type: numeric(12, 2)
+      type: bigint
     - default: now()
       name: created_at
       type: timestamptz
@@ -106,13 +106,13 @@ operations:
         constraint: price >= 0
         name: receipt_products_price_check
       name: price
-      type: numeric(12, 2)
+      type: bigint
     - check:
         constraint: discount >= 0 AND discount <= price
         name: receipt_products_discount_check
       default: "0"
       name: discount
-      type: numeric(12, 2)
+      type: bigint
     constraints:
     - columns:
       - receipt_id
