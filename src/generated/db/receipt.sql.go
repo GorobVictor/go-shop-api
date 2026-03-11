@@ -11,6 +11,17 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countReceipts = `-- name: CountReceipts :one
+select count(*) from public.receipts where user_id = $1
+`
+
+func (q *Queries) CountReceipts(ctx context.Context, userID int64) (int64, error) {
+	row := q.db.QueryRow(ctx, countReceipts, userID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createReceipt = `-- name: CreateReceipt :one
 INSERT INTO public.receipts(user_id, sum_price, sum_discount, stripe_id, stripe_status)
 	VALUES ($1, $2, $3, $4, $5) RETURNING id, user_id, sum_price, sum_discount, created_at, stripe_id, stripe_status
@@ -43,6 +54,70 @@ func (q *Queries) CreateReceipt(ctx context.Context, arg CreateReceiptParams) (R
 		&i.StripeStatus,
 	)
 	return i, err
+}
+
+const getReceipts = `-- name: GetReceipts :many
+select r.id, r.user_id, r.sum_price, r.sum_discount, r.created_at, r.stripe_id, r.stripe_status, rp.receipt_id, rp.product_id, rp.quantity, rp.price, rp.discount, p.name from 
+(select id, user_id, sum_price, sum_discount, created_at, stripe_id, stripe_status from public.receipts where user_id = $1 order by id desc limit $2 offset $3) r
+left join public.receipt_products rp on r.id = rp.receipt_id
+left join public.products p on rp.product_id = p.id
+order by r.id desc
+`
+
+type GetReceiptsParams struct {
+	UserID int64
+	Limit  int32
+	Offset int32
+}
+
+type GetReceiptsRow struct {
+	ID           int64
+	UserID       int64
+	SumPrice     int64
+	SumDiscount  int64
+	CreatedAt    pgtype.Timestamptz
+	StripeID     pgtype.Text
+	StripeStatus StripeStatus
+	ReceiptID    pgtype.Int8
+	ProductID    pgtype.Int8
+	Quantity     pgtype.Int4
+	Price        pgtype.Int8
+	Discount     pgtype.Int8
+	Name         pgtype.Text
+}
+
+func (q *Queries) GetReceipts(ctx context.Context, arg GetReceiptsParams) ([]GetReceiptsRow, error) {
+	rows, err := q.db.Query(ctx, getReceipts, arg.UserID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetReceiptsRow
+	for rows.Next() {
+		var i GetReceiptsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.SumPrice,
+			&i.SumDiscount,
+			&i.CreatedAt,
+			&i.StripeID,
+			&i.StripeStatus,
+			&i.ReceiptID,
+			&i.ProductID,
+			&i.Quantity,
+			&i.Price,
+			&i.Discount,
+			&i.Name,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const updateReceiptStatus = `-- name: UpdateReceiptStatus :one
