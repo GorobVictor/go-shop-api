@@ -1,0 +1,12 @@
+operations:
+- sql:
+    up: |-
+      CREATE TYPE stripe_status AS ENUM(
+          'pending',
+          'succeeded',
+          'failed',
+          'canceled',
+          'refunded'
+      )
+    down: |-
+      DROP TYPE IF EXISTS stripe_status;

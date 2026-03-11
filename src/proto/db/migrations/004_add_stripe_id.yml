@@ -1,0 +1,14 @@
+operations:
+- add_column:
+    column:
+      name: stripe_id
+      nullable: true
+      type: varchar(255)
+      default: null
+    table: receipts
+- add_column:
+    column:
+      default: '''pending'''
+      name: stripe_status
+      type: stripe_status
+    table: receipts
