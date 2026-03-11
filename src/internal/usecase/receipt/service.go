@@ -5,6 +5,8 @@ import (
 	"shop-api/generated/db"
 	"shop-api/internal/config"
 	"shop-api/internal/database/repositories"
+	"slices"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stripe/stripe-go/v84"
@@ -26,7 +28,30 @@ func NewReceiptService(receiptRepo *repositories.ReceiptRepository, productRepo 
 	return &ReceiptService{receiptRepo: receiptRepo, productRepo: productRepo, stripeClient: stripeClient, config: config}
 }
 
-func (s *ReceiptService) CreateReceipt(ctx context.Context, userId int64, model CreateReceiptDto) (ReceiptDto, error) {
+func (s *ReceiptService) GetReceipts(ctx context.Context, userId int64, limit int32, offset int32) (result ReceiptsPaginationDto, err error) {
+	result.Limit = limit
+	result.Offset = offset
+	count, err := s.receiptRepo.CountReceipts(ctx, userId)
+	if err != nil {
+		return ReceiptsPaginationDto{}, err
+	}
+	result.Total = count
+	res, err := s.receiptRepo.GetReceipts(ctx, userId, limit, offset)
+	if err != nil {
+		return ReceiptsPaginationDto{}, err
+	}
+	for _, r := range res {
+		idx := slices.IndexFunc(result.Receipts, func(temp ReceiptDto) bool { return temp.ID == r.ID })
+		if idx == -1 {
+			result.Receipts = append(result.Receipts, NewReceiptDto(r))
+		} else {
+			result.Receipts[idx].Products = append(result.Receipts[idx].Products, NewReceiptProductDto(r))
+		}
+	}
+	return result, nil
+}
+
+func (s *ReceiptService) CreateReceipt(ctx context.Context, userId int64, model CreateReceiptDto) (LinkDto, error) {
 
 	ids := make([]int64, 0)
 	for id := range model.Products {
@@ -35,7 +60,7 @@ func (s *ReceiptService) CreateReceipt(ctx context.Context, userId int64, model 
 
 	products, err := s.productRepo.GetProductByIds(ctx, ids)
 	if err != nil {
-		return ReceiptDto{}, err
+		return LinkDto{}, err
 	}
 
 	productsParams := make([]db.CreateReceiptProductParams, len(products))
@@ -78,7 +103,7 @@ func (s *ReceiptService) CreateReceipt(ctx context.Context, userId int64, model 
 	})
 
 	if err != nil {
-		return ReceiptDto{}, err
+		return LinkDto{}, err
 	}
 
 	_, _, err = s.receiptRepo.CreateReceipt(ctx, db.CreateReceiptParams{
@@ -90,16 +115,16 @@ func (s *ReceiptService) CreateReceipt(ctx context.Context, userId int64, model 
 	}, productsParams)
 
 	if err != nil {
-		return ReceiptDto{}, err
+		return LinkDto{}, err
 	}
 
-	return ReceiptDto{Link: session.URL}, nil
+	return LinkDto{Link: session.URL}, nil
 }
 
-func (s *ReceiptService) CancelReceipt(ctx context.Context, sessionId string) (ReceiptDto, error) {
+func (s *ReceiptService) CancelReceipt(ctx context.Context, sessionId string) (LinkDto, error) {
 	session, err := s.stripeClient.V1CheckoutSessions.Retrieve(ctx, sessionId, nil)
 	if err != nil {
-		return ReceiptDto{}, err
+		return LinkDto{}, err
 	}
 
 	status := parseStripeStatus(session.Status)
@@ -109,13 +134,13 @@ func (s *ReceiptService) CancelReceipt(ctx context.Context, sessionId string) (R
 		StripeStatus: status,
 	})
 
-	return ReceiptDto{Link: s.getRedirectUrl(status)}, err
+	return LinkDto{Link: s.getRedirectUrl(status)}, err
 }
 
-func (s *ReceiptService) SuccessReceipt(ctx context.Context, sessionId string) (ReceiptDto, error) {
+func (s *ReceiptService) SuccessReceipt(ctx context.Context, sessionId string) (LinkDto, error) {
 	session, err := s.stripeClient.V1CheckoutSessions.Retrieve(ctx, sessionId, nil)
 	if err != nil {
-		return ReceiptDto{}, err
+		return LinkDto{}, err
 	}
 
 	status := parseStripeStatus(session.Status)
@@ -125,7 +150,7 @@ func (s *ReceiptService) SuccessReceipt(ctx context.Context, sessionId string) (
 		StripeStatus: status,
 	})
 
-	return ReceiptDto{Link: s.getRedirectUrl(status)}, err
+	return LinkDto{Link: s.getRedirectUrl(status)}, err
 }
 
 func (s *ReceiptService) getRedirectUrl(status db.StripeStatus) string {
@@ -157,6 +182,39 @@ type CreateReceiptDto struct {
 	Products map[int64]int32 `json:"products"`
 }
 
-type ReceiptDto struct {
+type LinkDto struct {
 	Link string `json:"link"`
+}
+
+type ReceiptsPaginationDto struct {
+	Receipts []ReceiptDto `json:"receipts"`
+	Total    int64        `json:"total"`
+	Limit    int32        `json:"limit"`
+	Offset   int32        `json:"offset"`
+}
+
+type ReceiptDto struct {
+	ID           int64               `json:"id"`
+	SumPrice     int64               `json:"sumPrice"`
+	SumDiscount  int64               `json:"sumDiscount"`
+	CreatedAt    time.Time           `json:"createdAt"`
+	StripeID     string              `json:"stripeId"`
+	StripeStatus db.StripeStatus     `json:"stripeStatus"`
+	Products     []ReceiptProductDto `json:"products"`
+}
+
+func NewReceiptDto(r db.GetReceiptsRow) ReceiptDto {
+	return ReceiptDto{ID: r.ID, SumPrice: r.SumPrice, SumDiscount: r.SumDiscount, CreatedAt: r.CreatedAt.Time, StripeID: r.StripeID.String, StripeStatus: r.StripeStatus, Products: []ReceiptProductDto{NewReceiptProductDto(r)}}
+}
+
+type ReceiptProductDto struct {
+	ProductID int64  `json:"productId"`
+	Quantity  int32  `json:"quantity"`
+	Price     int64  `json:"price"`
+	Discount  int64  `json:"discount"`
+	Name      string `json:"name"`
+}
+
+func NewReceiptProductDto(r db.GetReceiptsRow) ReceiptProductDto {
+	return ReceiptProductDto{ProductID: r.ProductID.Int64, Quantity: r.Quantity.Int32, Price: r.Price.Int64, Discount: r.Discount.Int64, Name: r.Name.String}
 }

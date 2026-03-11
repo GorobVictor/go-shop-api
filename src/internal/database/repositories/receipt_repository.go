@@ -36,6 +36,7 @@ func (r *ReceiptRepository) CreateReceipt(ctx context.Context, receipt db.Create
 	resProducts := make([]db.ReceiptProduct, 0)
 
 	for _, product := range products {
+		product.ReceiptID = resReceipt.ID
 		resProductReceipt, err := q.CreateReceiptProduct(ctx, product)
 		resProducts = append(resProducts, resProductReceipt)
 
@@ -51,4 +52,14 @@ func (r *ReceiptRepository) CreateReceipt(ctx context.Context, receipt db.Create
 	}
 
 	return resReceipt, resProducts, nil
+}
+
+func (r *ReceiptRepository) GetReceipts(ctx context.Context, userId int64, limit int32, offset int32) ([]db.GetReceiptsRow, error) {
+	q := db.New(r.db)
+	return q.GetReceipts(ctx, db.GetReceiptsParams{UserID: userId, Limit: limit, Offset: offset})
+}
+
+func (r *ReceiptRepository) CountReceipts(ctx context.Context, userId int64) (int64, error) {
+	q := db.New(r.db)
+	return q.CountReceipts(ctx, userId)
 }

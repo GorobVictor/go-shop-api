@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"shop-api/internal/usecase/receipt"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth"
@@ -30,6 +31,7 @@ func (h *PaymentHandler) Payment(r *chi.Mux) {
 			r.Use(jwtauth.Authenticator)
 
 			r.Post("/create", h.createPayment)
+			r.Get("/get", h.getReceipts)
 		})
 	})
 }
@@ -101,4 +103,33 @@ func (h *PaymentHandler) cancelPayment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, result.Link, http.StatusSeeOther)
+}
+
+// Get Receipts
+// @Summary Get Receipts
+// @Tags payment
+// @Security ApiKeyAuth
+// @Param limit query int true "Limit"
+// @Param offset query int true "Offset"
+// @Success 200 {object} receipt.ReceiptsPaginationDto
+// @Router /payment/get [get]
+func (h *PaymentHandler) getReceipts(w http.ResponseWriter, r *http.Request) {
+	queries := r.URL.Query()
+	limit, err := strconv.ParseInt(queries.Get("limit"), 10, 32)
+	if err != nil {
+		writeBadRequest(w, err)
+	}
+	offset, err := strconv.ParseInt(queries.Get("offset"), 10, 64)
+	if err != nil {
+		writeBadRequest(w, err)
+	}
+
+	result, err := h.receiptSvc.GetReceipts(context.Background(), GetUserId(w, r), int32(limit), int32(offset))
+
+	if err != nil {
+		writeError(w, err, 500)
+		return
+	}
+
+	json.NewEncoder(w).Encode(result)
 }
