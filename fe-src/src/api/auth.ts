@@ -24,7 +24,7 @@ export async function signIn(body: SignInBody): Promise<TokenResponse> {
   })
   if (!res.ok) {
     const text = await res.text()
-    throw new Error(text || "Помилка входу")
+    throw new Error(text || "Sign in failed")
   }
   return res.json() as Promise<TokenResponse>
 }
@@ -37,7 +37,7 @@ export async function signUp(body: SignUpBody): Promise<TokenResponse> {
   })
   if (!res.ok) {
     const text = await res.text()
-    throw new Error(text || "Помилка реєстрації")
+    throw new Error(text || "Registration failed")
   }
   return res.json() as Promise<TokenResponse>
 }

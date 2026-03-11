@@ -19,6 +19,6 @@ export type ProductsResponse = {
 export async function getProducts(limit: number, offset: number): Promise<ProductsResponse> {
   const params = new URLSearchParams({ limit: String(limit), offset: String(offset) })
   const res = await fetch(`${API_BASE}/products/get?${params}`)
-  if (!res.ok) throw new Error("Не вдалося завантажити товари")
+  if (!res.ok) throw new Error("Failed to load products")
   return res.json() as Promise<ProductsResponse>
 }

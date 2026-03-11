@@ -22,10 +22,10 @@ export default function Cart() {
     return (
       <div className="container mx-auto max-w-2xl px-4 py-12 text-center">
         <p className="text-muted-foreground">
-          Увійдіть, щоб переглядати кошик та оформляти замовлення.
+          Sign in to view your cart and checkout.
         </p>
         <Button asChild className="mt-4">
-          <Link to="/login">Увійти</Link>
+          <Link to="/login">Sign in</Link>
         </Button>
       </div>
     )
@@ -50,7 +50,7 @@ export default function Cart() {
       clearCart()
       window.location.href = link
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Помилка оформлення")
+      setError(e instanceof Error ? e.message : "Checkout failed")
     } finally {
       setLoading(false)
     }
@@ -59,12 +59,12 @@ export default function Cart() {
   if (items.length === 0 && !loading) {
     return (
       <div className="container mx-auto max-w-2xl px-4 py-12">
-        <h1 className="mb-4 text-2xl font-semibold">Кошик</h1>
+        <h1 className="mb-4 text-2xl font-semibold">Cart</h1>
         <Card className="rounded-xl">
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <p className="text-muted-foreground">Кошик порожній</p>
+            <p className="text-muted-foreground">Your cart is empty</p>
             <Button asChild variant="outline" className="mt-4">
-              <Link to="/">Перейти до каталогу</Link>
+              <Link to="/">Go to catalog</Link>
             </Button>
           </CardContent>
         </Card>
@@ -74,7 +74,7 @@ export default function Cart() {
 
   return (
     <div className="container mx-auto max-w-2xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-semibold">Кошик</h1>
+      <h1 className="mb-6 text-2xl font-semibold">Cart</h1>
       {error && (
         <div className="mb-4 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error}
@@ -94,13 +94,13 @@ export default function Cart() {
                   className="text-muted-foreground -mr-2"
                   onClick={() => removeItem(item.productId)}
                 >
-                  Видалити
+                  Remove
                 </Button>
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
-                    <label className="text-sm text-muted-foreground">Кількість</label>
+                    <label className="text-sm text-muted-foreground">Quantity</label>
                     <Input
                       type="number"
                       min={1}
@@ -113,7 +113,7 @@ export default function Cart() {
                     />
                   </div>
                   <span className="text-muted-foreground">
-                    {finalPrice} грн × {item.quantity} = {lineTotal} грн
+                    ${finalPrice} × {item.quantity} = ${lineTotal}
                   </span>
                 </div>
               </CardContent>
@@ -124,8 +124,8 @@ export default function Cart() {
       <Card className="mt-6 rounded-xl">
         <CardContent className="flex flex-col gap-4 pt-6">
           <div className="flex justify-between text-lg font-semibold">
-            <span>Разом</span>
-            <span>{totalUah} грн</span>
+            <span>Total</span>
+            <span>${totalUah}</span>
           </div>
           <Button
             className="w-full rounded-lg"
@@ -133,10 +133,10 @@ export default function Cart() {
             disabled={loading}
             onClick={handleCheckout}
           >
-            {loading ? "Перенаправлення на оплату…" : "Оформити замовлення"}
+            {loading ? "Redirecting to checkout…" : "Proceed to checkout"}
           </Button>
           <p className="text-center text-xs text-muted-foreground">
-            Оплата через Stripe. Після натискання ви будете перенаправлені на безпечну сторінку оплати.
+            Payment is processed by Stripe. You will be redirected to a secure payment page.
           </p>
         </CardContent>
       </Card>

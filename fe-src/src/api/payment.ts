@@ -52,7 +52,7 @@ export async function createPayment(
   })
   if (!res.ok) {
     const text = await res.text()
-    throw new Error(text || "Помилка створення оплати")
+    throw new Error(text || "Failed to create payment")
   }
   return res.json() as Promise<PaymentLinkResponse>
 }
@@ -69,6 +69,6 @@ export async function getReceipts(
   const res = await fetch(`${API_BASE}/payment/get?${params}`, {
     headers: { Authorization: `Bearer ${token}` },
   })
-  if (!res.ok) throw new Error("Не вдалося завантажити історію покупок")
+  if (!res.ok) throw new Error("Failed to load order history")
   return res.json() as Promise<ReceiptsResponse>
 }

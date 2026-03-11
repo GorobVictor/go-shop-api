@@ -37,7 +37,7 @@ export default function Layout() {
                   to="/cart"
                   className="relative flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                 >
-                  Кошик
+                  Cart
                   {cartCount > 0 && (
                     <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground">
                       {cartCount > 99 ? "99+" : cartCount}
@@ -48,10 +48,10 @@ export default function Layout() {
                   to="/orders"
                   className="rounded-lg px-2 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                 >
-                  Історія
+                  Orders
                 </Link>
                 <span className="hidden text-sm text-muted-foreground sm:inline">
-                  {profile ? `Привіт, ${profile.firstName}` : "…"}
+                  {profile ? `Hi, ${profile.firstName}` : "…"}
                 </span>
                 <Button
                   variant="outline"
@@ -59,7 +59,7 @@ export default function Layout() {
                   onClick={() => signOut()}
                   className="border-border"
                 >
-                  Вийти
+                  Sign out
                 </Button>
               </>
             ) : (
@@ -68,7 +68,7 @@ export default function Layout() {
                   to="/cart"
                   className="relative flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                 >
-                  Кошик
+                  Cart
                   {cartCount > 0 && (
                     <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground">
                       {cartCount > 99 ? "99+" : cartCount}
@@ -76,10 +76,10 @@ export default function Layout() {
                   )}
                 </Link>
                 <Button variant="ghost" size="sm" asChild>
-                  <Link to="/login">Увійти</Link>
+                  <Link to="/login">Sign in</Link>
                 </Button>
                 <Button size="sm" asChild>
-                  <Link to="/register">Реєстрація</Link>
+                  <Link to="/register">Register</Link>
                 </Button>
               </>
             )}

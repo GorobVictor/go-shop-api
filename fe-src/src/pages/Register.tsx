@@ -40,9 +40,9 @@ export default function Register() {
     <div className="relative flex min-h-[calc(100vh-3.5rem)] items-center justify-center bg-gradient-to-b from-accent/30 to-background px-4 py-12">
       <Card className="w-full max-w-sm rounded-2xl border-border/80 shadow-xl">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl">Реєстрація</CardTitle>
+          <CardTitle className="text-2xl">Register</CardTitle>
           <CardDescription>
-            Створіть акаунт, заповнивши форму нижче
+            Create an account by filling out the form below
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
@@ -54,10 +54,10 @@ export default function Register() {
             )}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">Ім'я</Label>
+                <Label htmlFor="firstName">First name</Label>
                 <Input
                   id="firstName"
-                  placeholder="Іван"
+                  placeholder="John"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   required
@@ -66,10 +66,10 @@ export default function Register() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName">Прізвище</Label>
+                <Label htmlFor="lastName">Last name</Label>
                 <Input
                   id="lastName"
-                  placeholder="Петренко"
+                  placeholder="Doe"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   required
@@ -92,7 +92,7 @@ export default function Register() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Пароль</Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -110,15 +110,15 @@ export default function Register() {
               className="w-full rounded-lg"
               disabled={loading}
             >
-              {loading ? "Реєстрація…" : "Зареєструватися"}
+              {loading ? "Registering…" : "Register"}
             </Button>
             <p className="text-center text-sm text-muted-foreground">
-              Вже є акаунт?{" "}
+              Already have an account?{" "}
               <Link
                 to="/login"
                 className="font-medium text-primary underline-offset-4 hover:underline"
               >
-                Увійти
+                Sign in
               </Link>
             </p>
           </CardFooter>

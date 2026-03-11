@@ -14,16 +14,16 @@ import {
 const PAGE_SIZE = 10
 
 const STATUS_LABEL: Record<string, string> = {
-  pending: "Очікує",
-  succeeded: "Оплачено",
-  failed: "Помилка",
-  canceled: "Скасовано",
-  refunded: "Повернено",
+  pending: "Pending",
+  succeeded: "Paid",
+  failed: "Failed",
+  canceled: "Canceled",
+  refunded: "Refunded",
 }
 
 function formatDate(s: string) {
   try {
-    return new Date(s).toLocaleDateString("uk-UA", {
+    return new Date(s).toLocaleDateString("en-US", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
@@ -50,7 +50,7 @@ export default function Orders() {
     setLoading(true)
     getReceipts(token, PAGE_SIZE, page * PAGE_SIZE)
       .then(setData)
-      .catch((e) => setError(e instanceof Error ? e.message : "Помилка"))
+      .catch((e) => setError(e instanceof Error ? e.message : "Error"))
       .finally(() => setLoading(false))
   }, [token, page])
 
@@ -58,10 +58,10 @@ export default function Orders() {
     return (
       <div className="container mx-auto max-w-2xl px-4 py-12 text-center">
         <p className="text-muted-foreground">
-          Увійдіть, щоб переглядати історію покупок.
+          Sign in to view your order history.
         </p>
         <Button asChild className="mt-4">
-          <Link to="/login">Увійти</Link>
+          <Link to="/login">Sign in</Link>
         </Button>
       </div>
     )
@@ -81,7 +81,7 @@ export default function Orders() {
 
   return (
     <div className="container mx-auto max-w-2xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-semibold">Історія покупок</h1>
+      <h1 className="mb-6 text-2xl font-semibold">Order history</h1>
       {loading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
@@ -111,7 +111,7 @@ export default function Orders() {
                 disabled={page === 0}
                 onClick={() => setPage((p) => p - 1)}
               >
-                Назад
+                Previous
               </Button>
               <span className="flex items-center px-4 text-sm text-muted-foreground">
                 {page + 1} / {totalPages}
@@ -122,7 +122,7 @@ export default function Orders() {
                 disabled={page >= totalPages - 1}
                 onClick={() => setPage((p) => p + 1)}
               >
-                Далі
+                Next
               </Button>
             </div>
           )}
@@ -130,9 +130,9 @@ export default function Orders() {
       ) : (
         <Card className="rounded-xl">
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <p className="text-muted-foreground">Покупок поки немає</p>
+            <p className="text-muted-foreground">No orders yet</p>
             <Button asChild variant="outline" className="mt-4">
-              <Link to="/">Перейти до каталогу</Link>
+              <Link to="/">Go to catalog</Link>
             </Button>
           </CardContent>
         </Card>
@@ -151,13 +151,13 @@ function ReceiptCard({ receipt }: { receipt: Receipt }) {
       <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
         <div>
           <CardTitle className="text-base">
-            Замовлення #{receipt.id}
+            Order #{receipt.id}
           </CardTitle>
           <CardDescription>
             {formatDate(receipt.createdAt)} · {statusLabel}
           </CardDescription>
         </div>
-        <span className="font-semibold">{totalUah} грн</span>
+        <span className="font-semibold">${totalUah}</span>
       </CardHeader>
       <CardContent>
         <ul className="space-y-1 text-sm text-muted-foreground">
@@ -165,7 +165,7 @@ function ReceiptCard({ receipt }: { receipt: Receipt }) {
             const price = ((p.price - p.discount) / 100).toFixed(2)
             return (
               <li key={`${p.productId}-${p.name}`}>
-                {p.name} × {p.quantity} — {price} грн
+                {p.name} × {p.quantity} — ${price}
               </li>
             )
           })}

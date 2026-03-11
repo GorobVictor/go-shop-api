@@ -38,9 +38,9 @@ export default function Login() {
     <div className="relative flex min-h-[calc(100vh-3.5rem)] items-center justify-center bg-gradient-to-b from-accent/30 to-background px-4 py-12">
       <Card className="w-full max-w-sm rounded-2xl border-border/80 shadow-xl">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl">Вхід</CardTitle>
+          <CardTitle className="text-2xl">Sign in</CardTitle>
           <CardDescription>
-            Введіть email та пароль для входу в акаунт
+            Enter your email and password to sign in
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
@@ -64,7 +64,7 @@ export default function Login() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Пароль</Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -82,15 +82,15 @@ export default function Login() {
               className="w-full rounded-lg"
               disabled={loading}
             >
-              {loading ? "Вхід…" : "Увійти"}
+              {loading ? "Signing in…" : "Sign in"}
             </Button>
             <p className="text-center text-sm text-muted-foreground">
-              Немає акаунту?{" "}
+              Don't have an account?{" "}
               <Link
                 to="/register"
                 className="font-medium text-primary underline-offset-4 hover:underline"
               >
-                Зареєструватися
+                Register
               </Link>
             </p>
           </CardFooter>

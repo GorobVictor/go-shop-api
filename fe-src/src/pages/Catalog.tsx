@@ -36,7 +36,7 @@ function ProductCard({ product }: { product: Product }) {
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-            <span className="text-sm">Немає зображення</span>
+            <span className="text-sm">No image</span>
           </div>
         )}
         {hasDiscount && discountPercent > 0 && (
@@ -60,14 +60,14 @@ function ProductCard({ product }: { product: Product }) {
           {hasDiscount ? (
             <>
               <span className="text-sm text-muted-foreground line-through">
-                {priceUah} грн
+                ${priceUah}
               </span>
               <span className="text-lg font-semibold text-primary">
-                {finalPriceUah} грн
+                ${finalPriceUah}
               </span>
             </>
           ) : (
-            <span className="text-lg font-semibold">{priceUah} грн</span>
+            <span className="text-lg font-semibold">${priceUah}</span>
           )}
         </div>
       </CardContent>
@@ -84,7 +84,7 @@ function ProductCard({ product }: { product: Product }) {
             })
           }
         >
-          В кошик
+          Add to cart
         </Button>
       </CardFooter>
     </Card>
@@ -122,7 +122,7 @@ export default function Catalog() {
     setError(null)
     getProducts(PAGE_SIZE, page * PAGE_SIZE)
       .then(setData)
-      .catch((e) => setError(e instanceof Error ? e.message : "Помилка"))
+      .catch((e) => setError(e instanceof Error ? e.message : "Error"))
       .finally(() => setLoading(false))
   }, [page])
 
@@ -132,7 +132,7 @@ export default function Catalog() {
         <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-center">
           <p className="font-medium text-destructive">{error}</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Перевірте підключення до сервера та оновіть сторінку.
+            Check your connection and refresh the page.
           </p>
         </div>
       </div>
@@ -149,10 +149,10 @@ export default function Catalog() {
     <div className="container mx-auto max-w-6xl px-4 py-8">
       <section className="mb-10 text-center">
         <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-          Каталог продуктів
+          Product catalog
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Відкритий каталог — переглядайте товари без реєстрації
+          Browse products — no account required
         </p>
       </section>
 
@@ -173,7 +173,7 @@ export default function Catalog() {
           {totalPages > 1 && (
             <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
               <p className="text-sm text-muted-foreground">
-                Показано {from}–{to} з {data.total}
+                Showing {from}–{to} of {data.total}
               </p>
               <div className="flex items-center gap-2">
                 <Button
@@ -182,7 +182,7 @@ export default function Catalog() {
                   disabled={page === 0}
                   onClick={() => setPage((p) => p - 1)}
                 >
-                  Назад
+                  Previous
                 </Button>
                 <span className="min-w-[4rem] text-center text-sm text-muted-foreground">
                   {page + 1} / {totalPages}
@@ -193,7 +193,7 @@ export default function Catalog() {
                   disabled={page >= totalPages - 1}
                   onClick={() => setPage((p) => p + 1)}
                 >
-                  Далі
+                  Next
                 </Button>
               </div>
             </div>
@@ -202,7 +202,7 @@ export default function Catalog() {
       ) : (
         <div className="rounded-xl border border-dashed border-border bg-muted/30 py-16 text-center">
           <p className="text-muted-foreground">
-            Товарів поки немає. Заходьте пізніше.
+            No products yet. Check back later.
           </p>
         </div>
       )}

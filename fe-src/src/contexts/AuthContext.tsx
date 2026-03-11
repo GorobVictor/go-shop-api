@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem(TOKEN_KEY, t)
       setToken(t)
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Помилка входу"
+      const msg = e instanceof Error ? e.message : "Sign in failed"
       setError(msg)
       throw e
     }
@@ -63,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(TOKEN_KEY, t)
         setToken(t)
       } catch (e) {
-        const msg = e instanceof Error ? e.message : "Помилка реєстрації"
+        const msg = e instanceof Error ? e.message : "Registration failed"
         setError(msg)
         throw e
       }

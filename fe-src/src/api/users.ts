@@ -13,6 +13,6 @@ export async function getProfile(token: string): Promise<Profile> {
   const res = await fetch(`${API_BASE}/users/me`, {
     headers: { Authorization: `Bearer ${token}` },
   })
-  if (!res.ok) throw new Error("Не вдалося завантажити профіль")
+  if (!res.ok) throw new Error("Failed to load profile")
   return res.json() as Promise<Profile>
 }

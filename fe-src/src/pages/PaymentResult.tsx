@@ -15,23 +15,23 @@ const CONFIG: Record<
   { title: string; description: string; icon: string }
 > = {
   success: {
-    title: "Оплата успішна",
-    description: "Дякуємо за покупку. Деталі замовлення можна переглянути в історії покупок.",
+    title: "Payment successful",
+    description: "Thank you for your purchase. You can view order details in your order history.",
     icon: "✓",
   },
   failed: {
-    title: "Оплата не виконана",
-    description: "Щось пішло не так під час оплати. Спробуйте ще раз або оберіть інший спосіб оплати.",
+    title: "Payment failed",
+    description: "Something went wrong during payment. Please try again or use a different payment method.",
     icon: "✕",
   },
   canceled: {
-    title: "Оплату скасовано",
-    description: "Ви скасували оплату. Кошик збережено — можете продовжити покупки.",
+    title: "Payment canceled",
+    description: "You canceled the payment. Your cart has been saved — you can continue shopping.",
     icon: "○",
   },
   "something-went-wrong": {
-    title: "Щось пішло не так",
-    description: "Виникла помилка. Спробуйте пізніше або зверніться до підтримки.",
+    title: "Something went wrong",
+    description: "An error occurred. Please try again later or contact support.",
     icon: "?",
   },
 }
@@ -65,16 +65,16 @@ export default function PaymentResult() {
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           <Button asChild className="rounded-lg">
-            <Link to="/">{isSuccess ? "На головну" : "Повернутися в каталог"}</Link>
+            <Link to="/">{isSuccess ? "Home" : "Back to catalog"}</Link>
           </Button>
           {isSuccess && (
             <Button asChild variant="outline" className="rounded-lg">
-              <Link to="/orders">Історія покупок</Link>
+              <Link to="/orders">Order history</Link>
             </Button>
           )}
           {variant === "canceled" && (
             <Button asChild variant="outline" className="rounded-lg">
-              <Link to="/cart">Перейти до кошика</Link>
+              <Link to="/cart">Go to cart</Link>
             </Button>
           )}
         </CardContent>
