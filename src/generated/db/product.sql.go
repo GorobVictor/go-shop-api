@@ -70,7 +70,7 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 
 const getProductByIds = `-- name: GetProductByIds :many
 Select id, name, price, discount, description, image, created_at from products
-WHERE id = ANY($1::BIGSERIAL[])
+WHERE id = ANY($1::BIGINT[])
 `
 
 func (q *Queries) GetProductByIds(ctx context.Context, dollar_1 []int64) ([]Product, error) {

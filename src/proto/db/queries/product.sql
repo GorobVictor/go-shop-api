@@ -19,4 +19,4 @@ where name ilike $1;
 
 -- name: GetProductByIds :many
 Select id, name, price, discount, description, image, created_at from products
-WHERE id = ANY($1::BIGSERIAL[]);
+WHERE id = ANY($1::BIGINT[]);
