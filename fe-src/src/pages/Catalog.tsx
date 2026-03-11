@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { getProducts, type Product } from "@/api/products"
+import { useCart } from "@/contexts/CartContext"
 import {
   Card,
   CardContent,
@@ -13,6 +14,7 @@ import { Button } from "@/components/ui/button"
 const PAGE_SIZE = 12
 
 function ProductCard({ product }: { product: Product }) {
+  const { addItem } = useCart()
   const priceUah = (product.price / 100).toFixed(2)
   const finalPrice =
     product.discount > 0 ? product.price - product.discount : product.price
@@ -69,13 +71,20 @@ function ProductCard({ product }: { product: Product }) {
           )}
         </div>
       </CardContent>
-      <CardFooter className="pt-0">
+      <CardFooter className="flex gap-2 pt-0">
         <Button
-          variant="outline"
-          className="w-full rounded-lg"
-          disabled
+          variant="default"
+          className="flex-1 rounded-lg"
+          onClick={() =>
+            addItem({
+              productId: product.id,
+              name: product.name,
+              price: product.price,
+              discount: product.discount,
+            })
+          }
         >
-          Деталі (скоро)
+          В кошик
         </Button>
       </CardFooter>
     </Card>

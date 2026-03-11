@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react"
 import { Link, Outlet } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
+import { useCart } from "@/contexts/CartContext"
 import { getProfile, type Profile } from "@/api/users"
 import { Button } from "@/components/ui/button"
 
 export default function Layout() {
   const { token, isAuthenticated, signOut } = useAuth()
+  const { totalCount: cartCount } = useCart()
   const [profile, setProfile] = useState<Profile | null>(null)
 
   useEffect(() => {
@@ -31,10 +33,25 @@ export default function Layout() {
           <nav className="flex items-center gap-3">
             {isAuthenticated ? (
               <>
+                <Link
+                  to="/cart"
+                  className="relative flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                >
+                  Кошик
+                  {cartCount > 0 && (
+                    <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground">
+                      {cartCount > 99 ? "99+" : cartCount}
+                    </span>
+                  )}
+                </Link>
+                <Link
+                  to="/orders"
+                  className="rounded-lg px-2 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                >
+                  Історія
+                </Link>
                 <span className="hidden text-sm text-muted-foreground sm:inline">
-                  {profile
-                    ? `Привіт, ${profile.firstName}`
-                    : "…"}
+                  {profile ? `Привіт, ${profile.firstName}` : "…"}
                 </span>
                 <Button
                   variant="outline"
@@ -47,6 +64,17 @@ export default function Layout() {
               </>
             ) : (
               <>
+                <Link
+                  to="/cart"
+                  className="relative flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                >
+                  Кошик
+                  {cartCount > 0 && (
+                    <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground">
+                      {cartCount > 99 ? "99+" : cartCount}
+                    </span>
+                  )}
+                </Link>
                 <Button variant="ghost" size="sm" asChild>
                   <Link to="/login">Увійти</Link>
                 </Button>
