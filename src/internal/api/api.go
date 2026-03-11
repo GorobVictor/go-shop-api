@@ -1,47 +1,52 @@
 package api
 
 import (
+	"context"
 	"log"
 	"net/http"
-	"os"
 	"shop-api/internal/api/routes"
-	"shop-api/internal/database"
+	"shop-api/internal/config"
 	"shop-api/internal/database/repositories"
 	"shop-api/internal/usecase/product"
+	"shop-api/internal/usecase/receipt"
 	"shop-api/internal/usecase/user"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/jwtauth"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/stripe/stripe-go/v84"
 
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
 func Run() {
-	secret := os.Getenv("JWT_SECRET")
-
-	if secret == "" {
-		log.Fatalln("JWT secret is null")
+	config, err := config.LoadConfig()
+	if err != nil {
+		log.Fatalln("problem with config, " + err.Error())
 	}
-	conn, err := database.GetConnection()
 
+	conn, err := pgxpool.New(context.Background(), config.PostgresUrl)
 	if err != nil {
 		log.Fatalln("problem with db pool, " + err.Error())
 	}
-
 	defer conn.Close()
 
-	tokenAuth := jwtauth.New("HS256", []byte(secret), nil)
+	tokenAuth := jwtauth.New("HS256", []byte(config.JwtSecret), nil)
+	stripeClient := stripe.NewClient(config.StripeSecret)
 
 	userRepo := repositories.NewUserRepository(conn)
 	productRepo := repositories.NewProductRepository(conn)
+	receiptRepo := repositories.NewReceiptRepository(conn)
 
 	userSvc := user.NewUserService(userRepo)
 	productSvc := product.NewProductService(productRepo)
+	receiptSvc := receipt.NewReceiptService(receiptRepo, productRepo, stripeClient, &config)
 
 	userHandler := routes.NewUserHandler(userSvc, tokenAuth)
 	productHandler := routes.NewProductHandler(productSvc, tokenAuth)
+	paymentHandler := routes.NewPaymentHandler(receiptSvc, tokenAuth)
 
 	r := chi.NewRouter()
 
@@ -66,6 +71,7 @@ func Run() {
 
 	userHandler.Users(r)
 	productHandler.Products(r)
+	paymentHandler.Payment(r)
 
 	log.Println("Server starting on port :3000")
 	log.Fatalln(http.ListenAndServe(":3000", r))

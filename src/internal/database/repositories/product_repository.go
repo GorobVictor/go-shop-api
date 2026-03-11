@@ -58,3 +58,13 @@ func (r *ProductRepository) CountProductsByName(ctx context.Context, name string
 	q := db.New(r.db)
 	return q.CountProductsByName(ctx, name)
 }
+
+func (r *ProductRepository) GetProductByIds(ctx context.Context, ids []int64) ([]db.Product, error) {
+	q := db.New(r.db)
+	return q.GetProductByIds(ctx, ids)
+}
+
+func (r *ProductRepository) UpdateReceiptStatus(ctx context.Context, receipt db.UpdateReceiptStatusParams) (db.Receipt, error) {
+	q := db.New(r.db)
+	return q.UpdateReceiptStatus(ctx, receipt)
+}
