@@ -14,8 +14,6 @@ import (
 
 var CURRENCY = "usd"
 var MODE = "payment"
-var SUCCESS_URL = "http://localhost:3000"
-var CANCEL_URL = "http://localhost:3000/api/receipts/cancel"
 
 type ReceiptService struct {
 	receiptRepo  *repositories.ReceiptRepository
@@ -92,8 +90,8 @@ func (s *ReceiptService) CreateReceipt(ctx context.Context, userId int64, model 
 		}
 	}
 
-	successUrl := s.config.BackendUrl + "/api/receipts/success?sessionId={{CHECKOUT_SESSION_ID}}"
-	cancelUrl := s.config.BackendUrl + "/api/receipts/cancel?sessionId={{CHECKOUT_SESSION_ID}}"
+	successUrl := s.config.BackendUrl + "/api/payment/success?sessionId={{CHECKOUT_SESSION_ID}}"
+	cancelUrl := s.config.BackendUrl + "/api/payment/cancel?sessionId={{CHECKOUT_SESSION_ID}}"
 
 	session, err := s.stripeClient.V1CheckoutSessions.Create(ctx, &stripe.CheckoutSessionCreateParams{
 		LineItems:  stripeParams,

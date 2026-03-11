@@ -73,6 +73,13 @@ func (h *PaymentHandler) successPayment(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	if sessionId[0] == '{' {
+		sessionId = sessionId[1:]
+	}
+	if sessionId[len(sessionId)-1] == '}' {
+		sessionId = sessionId[:len(sessionId)-1]
+	}
+
 	result, err := h.receiptSvc.SuccessReceipt(context.Background(), sessionId)
 	if err != nil {
 		writeError(w, err, 500)
