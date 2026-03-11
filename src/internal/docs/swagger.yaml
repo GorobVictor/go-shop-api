@@ -42,12 +42,25 @@ definitions:
         type: integer
       offset:
         type: integer
-      total:
-        type: integer
-      users:
+      products:
         items:
           $ref: '#/definitions/product.ProductDto'
         type: array
+      total:
+        type: integer
+    type: object
+  receipt.CreateReceiptDto:
+    properties:
+      products:
+        additionalProperties:
+          format: int32
+          type: integer
+        type: object
+    type: object
+  receipt.ReceiptDto:
+    properties:
+      link:
+        type: string
     type: object
   user.ProfileDto:
     properties:
@@ -118,6 +131,61 @@ info:
   title: Shop Api
   version: "1.0"
 paths:
+  /payment/cancel:
+    get:
+      parameters:
+      - description: Session ID
+        in: query
+        name: sessionId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/receipt.ReceiptDto'
+      security:
+      - ApiKeyAuth: []
+      summary: Cancel Payment
+      tags:
+      - payment
+  /payment/create:
+    post:
+      parameters:
+      - description: Payment details
+        in: body
+        name: payment
+        required: true
+        schema:
+          $ref: '#/definitions/receipt.CreateReceiptDto'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/receipt.ReceiptDto'
+      security:
+      - ApiKeyAuth: []
+      summary: Create Payment
+      tags:
+      - payment
+  /payment/success:
+    get:
+      parameters:
+      - description: Session ID
+        in: query
+        name: sessionId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/receipt.ReceiptDto'
+      security:
+      - ApiKeyAuth: []
+      summary: Success Payment
+      tags:
+      - payment
   /products/create:
     post:
       parameters:

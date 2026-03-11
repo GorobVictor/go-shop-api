@@ -15,6 +15,98 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/payment/cancel": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "tags": [
+                    "payment"
+                ],
+                "summary": "Cancel Payment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "sessionId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/receipt.ReceiptDto"
+                        }
+                    }
+                }
+            }
+        },
+        "/payment/create": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "tags": [
+                    "payment"
+                ],
+                "summary": "Create Payment",
+                "parameters": [
+                    {
+                        "description": "Payment details",
+                        "name": "payment",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/receipt.CreateReceiptDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/receipt.ReceiptDto"
+                        }
+                    }
+                }
+            }
+        },
+        "/payment/success": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "tags": [
+                    "payment"
+                ],
+                "summary": "Success Payment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "sessionId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/receipt.ReceiptDto"
+                        }
+                    }
+                }
+            }
+        },
         "/products/create": {
             "post": {
                 "security": [
@@ -261,14 +353,34 @@ const docTemplate = `{
                 "offset": {
                     "type": "integer"
                 },
-                "total": {
-                    "type": "integer"
-                },
-                "users": {
+                "products": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/product.ProductDto"
                     }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "receipt.CreateReceiptDto": {
+            "type": "object",
+            "properties": {
+                "products": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            }
+        },
+        "receipt.ReceiptDto": {
+            "type": "object",
+            "properties": {
+                "link": {
+                    "type": "string"
                 }
             }
         },
