@@ -77,6 +77,43 @@ const docTemplate = `{
                 }
             }
         },
+        "/payment/get": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "tags": [
+                    "payment"
+                ],
+                "summary": "Get Receipts",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/receipt.ReceiptsPaginationDto"
+                        }
+                    }
+                }
+            }
+        },
         "/payment/success": {
             "get": {
                 "security": [
@@ -301,6 +338,23 @@ const docTemplate = `{
                 "RoleAdmin"
             ]
         },
+        "db.StripeStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "succeeded",
+                "failed",
+                "canceled",
+                "refunded"
+            ],
+            "x-enum-varnames": [
+                "StripeStatusPending",
+                "StripeStatusSucceeded",
+                "StripeStatusFailed",
+                "StripeStatusCanceled",
+                "StripeStatusRefunded"
+            ]
+        },
         "product.CreateProductDto": {
             "type": "object",
             "properties": {
@@ -379,8 +433,69 @@ const docTemplate = `{
         "receipt.ReceiptDto": {
             "type": "object",
             "properties": {
-                "link": {
+                "createdAt": {
                     "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/receipt.ReceiptProductDto"
+                    }
+                },
+                "stripeId": {
+                    "type": "string"
+                },
+                "stripeStatus": {
+                    "$ref": "#/definitions/db.StripeStatus"
+                },
+                "sumDiscount": {
+                    "type": "integer"
+                },
+                "sumPrice": {
+                    "type": "integer"
+                }
+            }
+        },
+        "receipt.ReceiptProductDto": {
+            "type": "object",
+            "properties": {
+                "discount": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "productId": {
+                    "type": "integer"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
+        "receipt.ReceiptsPaginationDto": {
+            "type": "object",
+            "properties": {
+                "limit": {
+                    "type": "integer"
+                },
+                "offset": {
+                    "type": "integer"
+                },
+                "receipts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/receipt.ReceiptDto"
+                    }
+                },
+                "total": {
+                    "type": "integer"
                 }
             }
         },

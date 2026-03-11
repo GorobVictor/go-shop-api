@@ -8,6 +8,20 @@ definitions:
     x-enum-varnames:
     - RoleMember
     - RoleAdmin
+  db.StripeStatus:
+    enum:
+    - pending
+    - succeeded
+    - failed
+    - canceled
+    - refunded
+    type: string
+    x-enum-varnames:
+    - StripeStatusPending
+    - StripeStatusSucceeded
+    - StripeStatusFailed
+    - StripeStatusCanceled
+    - StripeStatusRefunded
   product.CreateProductDto:
     properties:
       description:
@@ -59,8 +73,48 @@ definitions:
     type: object
   receipt.ReceiptDto:
     properties:
-      link:
+      createdAt:
         type: string
+      id:
+        type: integer
+      products:
+        items:
+          $ref: '#/definitions/receipt.ReceiptProductDto'
+        type: array
+      stripeId:
+        type: string
+      stripeStatus:
+        $ref: '#/definitions/db.StripeStatus'
+      sumDiscount:
+        type: integer
+      sumPrice:
+        type: integer
+    type: object
+  receipt.ReceiptProductDto:
+    properties:
+      discount:
+        type: integer
+      name:
+        type: string
+      price:
+        type: integer
+      productId:
+        type: integer
+      quantity:
+        type: integer
+    type: object
+  receipt.ReceiptsPaginationDto:
+    properties:
+      limit:
+        type: integer
+      offset:
+        type: integer
+      receipts:
+        items:
+          $ref: '#/definitions/receipt.ReceiptDto'
+        type: array
+      total:
+        type: integer
     type: object
   user.ProfileDto:
     properties:
@@ -166,6 +220,29 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Create Payment
+      tags:
+      - payment
+  /payment/get:
+    get:
+      parameters:
+      - description: Limit
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/receipt.ReceiptsPaginationDto'
+      security:
+      - ApiKeyAuth: []
+      summary: Get Receipts
       tags:
       - payment
   /payment/success:
