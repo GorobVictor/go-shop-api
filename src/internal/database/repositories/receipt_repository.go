@@ -33,10 +33,6 @@ func (r *ReceiptRepository) CreateReceipt(ctx context.Context, receipt db.Create
 		return db.Receipt{}, []db.ReceiptProduct{}, err
 	}
 
-	if err != nil {
-		return db.Receipt{}, []db.ReceiptProduct{}, err
-	}
-
 	resProducts := make([]db.ReceiptProduct, 0)
 
 	for _, product := range products {
