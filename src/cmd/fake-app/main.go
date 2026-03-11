@@ -4,15 +4,21 @@ import (
 	"context"
 	"log"
 	"shop-api/generated/db"
-	"shop-api/internal/database"
+	"shop-api/internal/config"
 	"shop-api/internal/database/repositories"
 
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func main() {
-	conn, err := database.GetConnection()
+	config, err := config.LoadConfig()
+	if err != nil {
+		log.Fatalln("problem with config, " + err.Error())
+	}
+
+	conn, err := pgxpool.New(context.Background(), config.PostgresUrl)
 	if err != nil {
 		log.Fatalln("problem with db pool, " + err.Error())
 	}
