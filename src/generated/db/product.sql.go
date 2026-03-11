@@ -68,6 +68,39 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 	return i, err
 }
 
+const getProductByIds = `-- name: GetProductByIds :many
+Select id, name, price, discount, description, image, created_at from products
+WHERE id = ANY($1::BIGSERIAL[])
+`
+
+func (q *Queries) GetProductByIds(ctx context.Context, dollar_1 []int64) ([]Product, error) {
+	rows, err := q.db.Query(ctx, getProductByIds, dollar_1)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Product
+	for rows.Next() {
+		var i Product
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Price,
+			&i.Discount,
+			&i.Description,
+			&i.Image,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getProducts = `-- name: GetProducts :many
 Select id, name, price, discount, description, image, created_at from products order by id limit $1 offset $2
 `

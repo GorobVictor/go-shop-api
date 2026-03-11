@@ -16,3 +16,7 @@ order by id limit $2 offset $3;
 -- name: CountProductsByName :one
 Select count(*) from products
 where name ilike $1;
+
+-- name: GetProductByIds :many
+Select id, name, price, discount, description, image, created_at from products
+WHERE id = ANY($1::BIGSERIAL[]);

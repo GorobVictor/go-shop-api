@@ -53,6 +53,51 @@ func (ns NullRole) Value() (driver.Value, error) {
 	return string(ns.Role), nil
 }
 
+type StripeStatus string
+
+const (
+	StripeStatusPending   StripeStatus = "pending"
+	StripeStatusSucceeded StripeStatus = "succeeded"
+	StripeStatusFailed    StripeStatus = "failed"
+	StripeStatusCanceled  StripeStatus = "canceled"
+	StripeStatusRefunded  StripeStatus = "refunded"
+)
+
+func (e *StripeStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = StripeStatus(s)
+	case string:
+		*e = StripeStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for StripeStatus: %T", src)
+	}
+	return nil
+}
+
+type NullStripeStatus struct {
+	StripeStatus StripeStatus
+	Valid        bool // Valid is true if StripeStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullStripeStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.StripeStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.StripeStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullStripeStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.StripeStatus), nil
+}
+
 type Product struct {
 	ID          int64
 	Name        string
@@ -64,11 +109,13 @@ type Product struct {
 }
 
 type Receipt struct {
-	ID          int64
-	UserID      int64
-	SumPrice    int64
-	SumDiscount int64
-	CreatedAt   pgtype.Timestamptz
+	ID           int64
+	UserID       int64
+	SumPrice     int64
+	SumDiscount  int64
+	CreatedAt    pgtype.Timestamptz
+	StripeID     pgtype.Text
+	StripeStatus StripeStatus
 }
 
 type ReceiptProduct struct {
