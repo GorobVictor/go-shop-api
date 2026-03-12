@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"shop-api/internal/usecase/user"
-	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth"
@@ -48,10 +47,7 @@ func (h *UserHandler) Users(r *chi.Mux) {
 // @Router /users/signin [post]
 func (h *UserHandler) signIn(w http.ResponseWriter, r *http.Request) {
 	var model user.SignInDto
-	if err := json.NewDecoder(r.Body).Decode(&model); err != nil {
-		http.Error(w, "Invalid JSON", 400)
-		return
-	}
+	ReadBody(w, r, &model)
 
 	user, err := h.userSvc.SignIn(context.Background(), model, h.tokenAuth)
 
@@ -72,10 +68,7 @@ func (h *UserHandler) signIn(w http.ResponseWriter, r *http.Request) {
 // @Router /users/signup [post]
 func (h *UserHandler) signUp(w http.ResponseWriter, r *http.Request) {
 	var model user.SignUpDto
-	if err := json.NewDecoder(r.Body).Decode(&model); err != nil {
-		http.Error(w, "Invalid JSON", 400)
-		return
-	}
+	ReadBody(w, r, &model)
 
 	user, err := h.userSvc.SignUp(context.Background(), model, h.tokenAuth)
 
@@ -95,7 +88,6 @@ func (h *UserHandler) signUp(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} user.ProfileDto
 // @Router /users/me [get]
 func (h *UserHandler) me(w http.ResponseWriter, r *http.Request) {
-
 	userId := GetUserId(w, r)
 
 	user, err := h.userSvc.GetProfile(context.Background(), userId)
@@ -118,17 +110,7 @@ func (h *UserHandler) me(w http.ResponseWriter, r *http.Request) {
 // @Param offset query int true "Offset"
 // @Router /users/get [get]
 func (h *UserHandler) getUsers(w http.ResponseWriter, r *http.Request) {
-	queries := r.URL.Query()
-	limit, err := strconv.ParseInt(queries.Get("limit"), 10, 32)
-	if err != nil {
-		writeBadRequest(w, err)
-	}
-	offset, err := strconv.ParseInt(queries.Get("offset"), 10, 64)
-	if err != nil {
-		writeBadRequest(w, err)
-	}
-
-	result, err := h.userSvc.GetUsers(context.Background(), int32(limit), int32(offset))
+	result, err := h.userSvc.GetUsers(context.Background(), GetQueryInt32(r, "limit"), GetQueryInt32(r, "offset"))
 
 	if err != nil {
 		w.Write([]byte(err.Error()))

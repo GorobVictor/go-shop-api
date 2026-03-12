@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	customerrors "shop-api/internal/custom_errors"
 	"shop-api/internal/usecase/product"
-	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth"
@@ -45,16 +45,12 @@ func (h *ProductHandler) Products(r *chi.Mux) {
 // @Success 200 {object} product.ProductDto
 // @Router /products/create [post]
 func (h *ProductHandler) createProduct(w http.ResponseWriter, r *http.Request) {
-	var product product.CreateProductDto
-	if err := json.NewDecoder(r.Body).Decode(&product); err != nil {
-		http.Error(w, "Invalid JSON", 400)
-		return
-	}
+	var model product.CreateProductDto
+	ReadBody(w, r, &model)
 
-	result, err := h.productSvc.CreateProduct(context.Background(), product)
+	result, err := h.productSvc.CreateProduct(context.Background(), model)
 	if err != nil {
-		writeError(w, err, 500)
-		return
+		panic(customerrors.NewInternalServerError())
 	}
 
 	json.NewEncoder(w).Encode(result)
@@ -69,20 +65,9 @@ func (h *ProductHandler) createProduct(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} product.ProductsPaginationDto
 // @Router /products/get [get]
 func (h *ProductHandler) getProducts(w http.ResponseWriter, r *http.Request) {
-	queries := r.URL.Query()
-	limit, err := strconv.ParseInt(queries.Get("limit"), 10, 32)
+	result, err := h.productSvc.GetProducts(context.Background(), GetQueryInt32(r, "limit"), GetQueryInt32(r, "offset"))
 	if err != nil {
-		writeBadRequest(w, err)
-	}
-	offset, err := strconv.ParseInt(queries.Get("offset"), 10, 32)
-	if err != nil {
-		writeBadRequest(w, err)
-	}
-
-	result, err := h.productSvc.GetProducts(context.Background(), int32(limit), int32(offset))
-	if err != nil {
-		writeError(w, err, 500)
-		return
+		panic(customerrors.NewInternalServerError())
 	}
 
 	json.NewEncoder(w).Encode(result)
