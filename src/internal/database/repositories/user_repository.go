@@ -2,9 +2,9 @@ package repositories
 
 import (
 	"context"
-	"errors"
 	"log"
 	"shop-api/generated/db"
+	customerrors "shop-api/internal/custom_errors"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -24,7 +24,7 @@ func (r *UserRepository) GetUserProfile(ctx context.Context, id int64) (db.GetUs
 	if err != nil {
 		log.Println(err.Error())
 		if err.Error() == "no rows in result set" {
-			return user, errors.New("wrong user id")
+			panic(&customerrors.BadRequestError{Message: "wrong user id"})
 		}
 	}
 
@@ -57,7 +57,7 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (db.U
 	if err != nil {
 		log.Println(err.Error())
 		if err.Error() == "no rows in result set" {
-			return user, errors.New("incorrect email")
+			panic(&customerrors.BadRequestError{Message: "incorrect email"})
 		}
 	}
 
@@ -75,7 +75,7 @@ func (r *UserRepository) AnyEmail(ctx context.Context, email string) error {
 	}
 
 	if err == nil {
-		return errors.New("Email already exists")
+		panic(&customerrors.BadRequestError{Message: "Email already exists"})
 	}
 
 	return err

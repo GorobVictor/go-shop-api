@@ -2,8 +2,8 @@ package user
 
 import (
 	"context"
-	"errors"
 	"shop-api/generated/db"
+	customerrors "shop-api/internal/custom_errors"
 	"shop-api/internal/database/repositories"
 	"time"
 
@@ -27,7 +27,7 @@ func (s *UserService) SignIn(ctx context.Context, model SignInDto, tokenAuth *jw
 	}
 
 	if !checkPasswordHash(model.Password, user.PasswordHash) {
-		return TokenDto{}, errors.New("incorrect password")
+		panic(customerrors.BadRequestError{Message: "incorrect password"})
 	}
 
 	token, err := generateToken(user, tokenAuth)
