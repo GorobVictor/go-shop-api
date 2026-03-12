@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"shop-api/internal/api/routes"
 	"shop-api/internal/config"
+	customerrors "shop-api/internal/custom_errors"
 	"shop-api/internal/database/repositories"
 	"shop-api/internal/usecase/product"
 	"shop-api/internal/usecase/receipt"
@@ -59,7 +60,11 @@ func Run() {
 
 	initSwagger(r)
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+	r.Get("/api/health", func(w http.ResponseWriter, r *http.Request) {
+		conn.Ping(context.Background())
+		if err != nil {
+			panic(customerrors.NewInternalServerError())
+		}
 		w.Write([]byte("Welcome!"))
 	})
 
