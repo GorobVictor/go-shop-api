@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/go-chi/cors"
 	"github.com/go-chi/httprate"
 	"github.com/go-chi/jwtauth"
 )
@@ -60,6 +61,17 @@ func GetAdminMiddleware(next http.Handler) http.Handler {
 
 func GetRateLimitMiddleware(next http.Handler) http.Handler {
 	return httprate.LimitByIP(100, time.Minute)(next)
+}
+
+func GetCORSMiddleware(next http.Handler) http.Handler {
+	return cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"https://*", "http://*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300,
+	})(next)
 }
 
 func GetPanicMiddleware(next http.Handler) http.Handler {

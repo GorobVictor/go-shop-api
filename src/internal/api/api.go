@@ -13,7 +13,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/cors"
 	"github.com/go-chi/jwtauth"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stripe/stripe-go/v84"
@@ -56,14 +55,7 @@ func Run() {
 	r.Use(middleware.Recoverer)
 	r.Use(routes.GetPanicMiddleware)
 	r.Use(routes.GetRateLimitMiddleware)
-	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"https://*", "http://*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: false,
-		MaxAge:           300,
-	}))
+	r.Use(routes.GetCORSMiddleware)
 
 	initSwagger(r)
 
