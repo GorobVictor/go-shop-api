@@ -55,6 +55,7 @@ func Run() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(routes.GetPanicMiddleware)
+	r.Use(routes.GetRateLimitMiddleware)
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},

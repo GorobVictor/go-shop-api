@@ -6,7 +6,9 @@ import (
 	"shop-api/generated/db"
 	customerrors "shop-api/internal/custom_errors"
 	"strconv"
+	"time"
 
+	"github.com/go-chi/httprate"
 	"github.com/go-chi/jwtauth"
 )
 
@@ -54,6 +56,10 @@ func GetAdminMiddleware(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+func GetRateLimitMiddleware(next http.Handler) http.Handler {
+	return httprate.LimitByIP(100, time.Minute)(next)
 }
 
 func GetPanicMiddleware(next http.Handler) http.Handler {
