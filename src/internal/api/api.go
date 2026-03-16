@@ -64,7 +64,7 @@ func Run() {
 	initSwagger(r)
 
 	r.Get("/api/health", func(w http.ResponseWriter, r *http.Request) {
-		conn.Ping(context.Background())
+		err := conn.Ping(context.Background())
 		if err != nil {
 			panic(customerrors.NewInternalServerError())
 		}
