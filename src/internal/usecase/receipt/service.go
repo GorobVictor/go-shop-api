@@ -4,6 +4,7 @@ import (
 	"context"
 	"shop-api/generated/db"
 	"shop-api/internal/config"
+	customerrors "shop-api/internal/custom_errors"
 	"shop-api/internal/database/repositories"
 	"slices"
 	"time"
@@ -59,6 +60,14 @@ func (s *ReceiptService) CreateReceipt(ctx context.Context, userId int64, model 
 	products, err := s.productRepo.GetProductByIds(ctx, ids)
 	if err != nil {
 		return LinkDto{}, err
+	}
+
+	if len(products) == 0 {
+		return LinkDto{}, &customerrors.BadRequestError{Message: "products not found"}
+	}
+
+	if len(products) != len(model.Products) {
+		return LinkDto{}, &customerrors.BadRequestError{Message: "products not found"}
 	}
 
 	productsParams := make([]db.CreateReceiptProductParams, len(products))
