@@ -27,47 +27,48 @@ type TokenDto struct {
 	Token string `json:"token"`
 }
 
-func GetUserId(w http.ResponseWriter, r *http.Request) int64 {
+func GetUserId(w http.ResponseWriter, r *http.Request) (int64, error) {
 	_, claims, _ := jwtauth.FromContext(r.Context())
 
 	userIdValue, ok := claims["user_id"]
 
 	if !ok {
-		panic(customerrors.UnauthorizedError{Message: "user_id not found"})
+		return 0, &customerrors.UnauthorizedError{Message: "user_id not found"}
 	}
 
 	userId, ok := userIdValue.(float64)
 
 	if !ok {
-		panic(customerrors.UnauthorizedError{Message: "user_id not found"})
+		return 0, &customerrors.UnauthorizedError{Message: "user_id not found"}
 	}
 
-	return int64(userId)
+	return int64(userId), nil
 }
 
-func GetUserRole(w http.ResponseWriter, r *http.Request) db.Role {
+func GetUserRole(w http.ResponseWriter, r *http.Request) (db.Role, error) {
 	_, claims, _ := jwtauth.FromContext(r.Context())
 
 	userRoleValue, ok := claims["user_role"]
 
 	if !ok {
-		panic(customerrors.ForbiddenError{Message: "user_role not found"})
+		return db.Role(""), &customerrors.ForbiddenError{Message: "user_role not found"}
 	}
 
 	userRole, ok := userRoleValue.(string)
 
 	if !ok {
-		panic(customerrors.ForbiddenError{Message: "user_role not found"})
+		return db.Role(""), &customerrors.ForbiddenError{Message: "user_role not found"}
 	}
 
-	return db.Role(userRole)
+	return db.Role(userRole), nil
 }
 
 func GetAdminMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		role := GetUserRole(w, r)
-		if role != db.RoleAdmin {
-			panic(customerrors.ForbiddenError{Message: "You are not admin!"})
+		role, err := GetUserRole(w, r)
+		if err != nil || role != db.RoleAdmin {
+			CheckError(w, &customerrors.ForbiddenError{Message: "You are not admin!"})
+			return
 		}
 		next.ServeHTTP(w, r)
 	})
@@ -92,24 +93,34 @@ func GetPanicMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
-				switch v := err.(type) {
-				case customerrors.BadRequestError:
-					WriteError(w, http.StatusBadRequest, &v)
-				case customerrors.UnauthorizedError:
-					WriteError(w, http.StatusUnauthorized, &v)
-				case customerrors.ForbiddenError:
-					WriteError(w, http.StatusForbidden, &v)
-				case customerrors.InternalServerError:
-					WriteError(w, http.StatusInternalServerError, &v)
-				case *customerrors.InternalServerError:
-					WriteError(w, http.StatusInternalServerError, v)
-				default:
-					WriteError(w, http.StatusInternalServerError, customerrors.NewInternalServerError())
-				}
+				CheckError(w, err)
 			}
 		}()
 		next.ServeHTTP(w, r)
 	})
+}
+
+func CheckError(w http.ResponseWriter, err any) {
+	switch v := err.(type) {
+	case customerrors.BadRequestError:
+		WriteError(w, http.StatusBadRequest, &v)
+	case *customerrors.BadRequestError:
+		WriteError(w, http.StatusBadRequest, v)
+	case customerrors.UnauthorizedError:
+		WriteError(w, http.StatusUnauthorized, &v)
+	case *customerrors.UnauthorizedError:
+		WriteError(w, http.StatusUnauthorized, v)
+	case customerrors.ForbiddenError:
+		WriteError(w, http.StatusForbidden, &v)
+	case *customerrors.ForbiddenError:
+		WriteError(w, http.StatusForbidden, v)
+	case customerrors.InternalServerError:
+		WriteError(w, http.StatusInternalServerError, &v)
+	case *customerrors.InternalServerError:
+		WriteError(w, http.StatusInternalServerError, v)
+	default:
+		WriteError(w, http.StatusInternalServerError, customerrors.NewInternalServerError())
+	}
 }
 
 func WriteError(w http.ResponseWriter, statusCode int, err error) {

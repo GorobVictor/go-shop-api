@@ -51,14 +51,14 @@ func (h *UserHandler) signIn(w http.ResponseWriter, r *http.Request) {
 	user, err := h.userSvc.SignIn(context.Background(), model, h.tokenAuth)
 
 	if err != nil {
-		WriteInternalServerError(w, err)
+		CheckError(w, err)
 		return
 	}
 
 	response, err := GenerateToken(user.ID, user.UserRole, h.tokenAuth)
 
 	if err != nil {
-		WriteInternalServerError(w, err)
+		CheckError(w, err)
 		return
 	}
 
@@ -78,14 +78,14 @@ func (h *UserHandler) signUp(w http.ResponseWriter, r *http.Request) {
 	user, err := h.userSvc.SignUp(context.Background(), model, h.tokenAuth)
 
 	if err != nil {
-		WriteInternalServerError(w, err)
+		CheckError(w, err)
 		return
 	}
 
 	response, err := GenerateToken(user.ID, user.UserRole, h.tokenAuth)
 
 	if err != nil {
-		WriteInternalServerError(w, err)
+		CheckError(w, err)
 		return
 	}
 
@@ -99,12 +99,16 @@ func (h *UserHandler) signUp(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} user.ProfileDto
 // @Router /users/me [get]
 func (h *UserHandler) me(w http.ResponseWriter, r *http.Request) {
-	userId := GetUserId(w, r)
+	userId, err := GetUserId(w, r)
+	if err != nil {
+		CheckError(w, err)
+		return
+	}
 
 	user, err := h.userSvc.GetProfile(context.Background(), userId)
 
 	if err != nil {
-		WriteInternalServerError(w, err)
+		CheckError(w, err)
 		return
 	}
 
@@ -123,7 +127,7 @@ func (h *UserHandler) getUsers(w http.ResponseWriter, r *http.Request) {
 	result, err := h.userSvc.GetUsers(context.Background(), GetQueryInt32(r, "limit"), GetQueryInt32(r, "offset"))
 
 	if err != nil {
-		WriteInternalServerError(w, err)
+		CheckError(w, err)
 		return
 	}
 

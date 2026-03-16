@@ -27,7 +27,7 @@ func (s *UserService) SignIn(ctx context.Context, model SignInDto, tokenAuth *jw
 	}
 
 	if !checkPasswordHash(model.Password, user.PasswordHash) {
-		panic(customerrors.BadRequestError{Message: "incorrect password"})
+		return SignInResDto{}, &customerrors.BadRequestError{Message: "incorrect password"}
 	}
 
 	return NewSignInResDto(user), err

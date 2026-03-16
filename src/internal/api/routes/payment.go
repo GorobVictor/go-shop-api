@@ -46,10 +46,16 @@ func (h *PaymentHandler) Payment(r *chi.Mux) {
 func (h *PaymentHandler) createPayment(w http.ResponseWriter, r *http.Request) {
 	var model receipt.CreateReceiptDto
 	ReadBody(w, r, &model)
-
-	result, err := h.receiptSvc.CreateReceipt(context.Background(), GetUserId(w, r), model)
+	userId, err := GetUserId(w, r)
 	if err != nil {
-		panic(customerrors.NewInternalServerError())
+		CheckError(w, err)
+		return
+	}
+
+	result, err := h.receiptSvc.CreateReceipt(context.Background(), userId, model)
+	if err != nil {
+		CheckError(w, err)
+		return
 	}
 
 	json.NewEncoder(w).Encode(result)
@@ -63,9 +69,15 @@ func (h *PaymentHandler) createPayment(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} receipt.ReceiptDto
 // @Router /payment/success [get]
 func (h *PaymentHandler) successPayment(w http.ResponseWriter, r *http.Request) {
-	result, err := h.receiptSvc.SuccessReceipt(context.Background(), parseSessionId(r))
+	sessionId, err := parseSessionId(r)
 	if err != nil {
-		panic(customerrors.NewInternalServerError())
+		CheckError(w, err)
+		return
+	}
+	result, err := h.receiptSvc.SuccessReceipt(context.Background(), sessionId)
+	if err != nil {
+		CheckError(w, err)
+		return
 	}
 
 	http.Redirect(w, r, result.Link, http.StatusSeeOther)
@@ -79,11 +91,16 @@ func (h *PaymentHandler) successPayment(w http.ResponseWriter, r *http.Request) 
 // @Success 200 {object} receipt.ReceiptDto
 // @Router /payment/cancel [get]
 func (h *PaymentHandler) cancelPayment(w http.ResponseWriter, r *http.Request) {
-	result, err := h.receiptSvc.CancelReceipt(context.Background(), parseSessionId(r))
+	sessionId, err := parseSessionId(r)
 	if err != nil {
-		panic(customerrors.NewInternalServerError())
+		CheckError(w, err)
+		return
 	}
-
+	result, err := h.receiptSvc.CancelReceipt(context.Background(), sessionId)
+	if err != nil {
+		CheckError(w, err)
+		return
+	}
 	http.Redirect(w, r, result.Link, http.StatusSeeOther)
 }
 
@@ -96,19 +113,25 @@ func (h *PaymentHandler) cancelPayment(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} receipt.ReceiptsPaginationDto
 // @Router /payment/get [get]
 func (h *PaymentHandler) getReceipts(w http.ResponseWriter, r *http.Request) {
-	result, err := h.receiptSvc.GetReceipts(context.Background(), GetUserId(w, r), GetQueryInt32(r, "limit"), GetQueryInt32(r, "offset"))
+	userId, err := GetUserId(w, r)
+	if err != nil {
+		CheckError(w, err)
+		return
+	}
+	result, err := h.receiptSvc.GetReceipts(context.Background(), userId, GetQueryInt32(r, "limit"), GetQueryInt32(r, "offset"))
 
 	if err != nil {
-		panic(customerrors.NewInternalServerError())
+		CheckError(w, err)
+		return
 	}
 
 	WriteOkResponse(w, result)
 }
 
-func parseSessionId(r *http.Request) string {
+func parseSessionId(r *http.Request) (string, error) {
 	sessionId := r.URL.Query().Get("sessionId")
 	if sessionId == "" {
-		panic(customerrors.BadRequestError{Message: "Session ID is required"})
+		return "", &customerrors.BadRequestError{Message: "Session ID is required"}
 	}
 
 	if len(sessionId) > 0 && sessionId[0] == '{' {
@@ -117,5 +140,5 @@ func parseSessionId(r *http.Request) string {
 	if len(sessionId) > 0 && sessionId[len(sessionId)-1] == '}' {
 		sessionId = sessionId[:len(sessionId)-1]
 	}
-	return sessionId
+	return sessionId, nil
 }

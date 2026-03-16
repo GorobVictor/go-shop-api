@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	customerrors "shop-api/internal/custom_errors"
 	"shop-api/internal/usecase/product"
 
 	"github.com/go-chi/chi/v5"
@@ -50,7 +49,8 @@ func (h *ProductHandler) createProduct(w http.ResponseWriter, r *http.Request) {
 
 	result, err := h.productSvc.CreateProduct(context.Background(), model)
 	if err != nil {
-		panic(customerrors.NewInternalServerError())
+		CheckError(w, err)
+		return
 	}
 
 	json.NewEncoder(w).Encode(result)
@@ -67,7 +67,8 @@ func (h *ProductHandler) createProduct(w http.ResponseWriter, r *http.Request) {
 func (h *ProductHandler) getProducts(w http.ResponseWriter, r *http.Request) {
 	result, err := h.productSvc.GetProducts(context.Background(), GetQueryInt32(r, "limit"), GetQueryInt32(r, "offset"))
 	if err != nil {
-		panic(customerrors.NewInternalServerError())
+		CheckError(w, err)
+		return
 	}
 
 	json.NewEncoder(w).Encode(result)

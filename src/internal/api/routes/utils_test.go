@@ -21,7 +21,11 @@ func TestGetUserId(t *testing.T) {
 	r.Use(jwtauth.Verifier(tokenAuth))
 	r.Use(jwtauth.Authenticator)
 	r.Get("/api/users/me", func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, int64(1), GetUserId(w, r))
+		userId, err := GetUserId(w, r)
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.Equal(t, int64(1), userId)
 	})
 	req := httptest.NewRequest("GET", "/api/users/me", nil)
 	req.Header.Set("Authorization", "Bearer "+token.Token)
@@ -39,7 +43,11 @@ func TestGetUserRole(t *testing.T) {
 	r.Use(jwtauth.Verifier(tokenAuth))
 	r.Use(jwtauth.Authenticator)
 	r.Get("/api/users/me", func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, db.RoleMember, GetUserRole(w, r))
+		userRole, err := GetUserRole(w, r)
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.Equal(t, db.RoleMember, userRole)
 	})
 	req := httptest.NewRequest("GET", "/api/users/me", nil)
 	req.Header.Set("Authorization", "Bearer "+token.Token)

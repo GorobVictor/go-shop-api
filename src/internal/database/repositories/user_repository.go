@@ -26,7 +26,7 @@ func (r *UserRepository) GetUserProfile(ctx context.Context, id int64) (db.GetUs
 	if err != nil {
 		log.Println(err.Error())
 		if errors.Is(err, pgx.ErrNoRows) {
-			panic(&customerrors.BadRequestError{Message: "wrong user id"})
+			return user, &customerrors.BadRequestError{Message: "wrong user id"}
 		}
 	}
 
@@ -56,7 +56,7 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (db.U
 	if err != nil {
 		log.Println(err.Error())
 		if errors.Is(err, pgx.ErrNoRows) {
-			panic(&customerrors.BadRequestError{Message: "incorrect email"})
+			return user, &customerrors.BadRequestError{Message: "incorrect email"}
 		}
 	}
 
@@ -73,7 +73,7 @@ func (r *UserRepository) AnyEmail(ctx context.Context, email string) error {
 	}
 
 	if err == nil {
-		panic(&customerrors.BadRequestError{Message: "Email already exists"})
+		return &customerrors.BadRequestError{Message: "Email already exists"}
 	}
 
 	return err

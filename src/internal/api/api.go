@@ -7,7 +7,6 @@ import (
 	"shop-api/generated/db"
 	"shop-api/internal/api/routes"
 	"shop-api/internal/config"
-	customerrors "shop-api/internal/custom_errors"
 	"shop-api/internal/database/repositories"
 	"shop-api/internal/usecase/product"
 	"shop-api/internal/usecase/receipt"
@@ -66,7 +65,8 @@ func Run() {
 	r.Get("/api/health", func(w http.ResponseWriter, r *http.Request) {
 		err := conn.Ping(context.Background())
 		if err != nil {
-			panic(customerrors.NewInternalServerError())
+			routes.WriteInternalServerError(w, err)
+			return
 		}
 		routes.WriteOkResponse(w, map[string]string{"status": "ok"})
 	})
