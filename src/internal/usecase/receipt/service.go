@@ -51,10 +51,15 @@ func (s *ReceiptService) GetReceipts(ctx context.Context, userId int64, limit in
 }
 
 func (s *ReceiptService) CreateReceipt(ctx context.Context, userId int64, model CreateReceiptDto) (LinkDto, error) {
-
 	ids := make([]int64, 0)
 	for id := range model.Products {
+		if model.Products[id] == 0 {
+			continue
+		}
 		ids = append(ids, id)
+	}
+	if len(ids) == 0 {
+		return LinkDto{}, &customerrors.BadRequestError{Message: "order is empty"}
 	}
 
 	products, err := s.productRepo.GetProductByIds(ctx, ids)
@@ -66,7 +71,7 @@ func (s *ReceiptService) CreateReceipt(ctx context.Context, userId int64, model 
 		return LinkDto{}, &customerrors.BadRequestError{Message: "products not found"}
 	}
 
-	if len(products) != len(model.Products) {
+	if len(products) != len(ids) {
 		return LinkDto{}, &customerrors.BadRequestError{Message: "products not found"}
 	}
 
@@ -76,6 +81,9 @@ func (s *ReceiptService) CreateReceipt(ctx context.Context, userId int64, model 
 
 	for i, product := range products {
 		quantity := model.Products[product.ID]
+		if quantity == 0 {
+			continue
+		}
 		sumPrice += product.Price * int64(quantity)
 		sumDiscount += product.Discount * int64(quantity)
 		productsParams[i] = db.CreateReceiptProductParams{
