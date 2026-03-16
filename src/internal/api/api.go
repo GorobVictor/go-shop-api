@@ -72,8 +72,8 @@ func Run() {
 	productHandler.Products(r)
 	paymentHandler.Payment(r)
 
-	log.Println("Server starting on port :3000")
-	log.Fatalln(http.ListenAndServe(":3000", r))
+	log.Println("Server starting on port :" + config.Port)
+	log.Fatalln(http.ListenAndServe(":"+config.Port, r))
 }
 
 func initSwagger(r *chi.Mux) {
