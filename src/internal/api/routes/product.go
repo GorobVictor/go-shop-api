@@ -2,7 +2,6 @@ package routes
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"shop-api/internal/usecase/product"
 
@@ -53,7 +52,7 @@ func (h *ProductHandler) createProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(result)
+	WriteOkResponse(w, result)
 }
 
 // Get Products
@@ -71,5 +70,5 @@ func (h *ProductHandler) getProducts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(result)
+	WriteOkResponse(w, result)
 }

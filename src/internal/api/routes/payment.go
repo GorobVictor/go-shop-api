@@ -2,7 +2,6 @@ package routes
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	customerrors "shop-api/internal/custom_errors"
 	"shop-api/internal/usecase/receipt"
@@ -58,7 +57,7 @@ func (h *PaymentHandler) createPayment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(result)
+	WriteOkResponse(w, result)
 }
 
 // Success Payment
