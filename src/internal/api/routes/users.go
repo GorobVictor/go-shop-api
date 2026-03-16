@@ -53,11 +53,17 @@ func (h *UserHandler) signIn(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.Write([]byte(err.Error()))
-
 		return
 	}
 
-	json.NewEncoder(w).Encode(user)
+	response, err := GenerateToken(user.ID, user.UserRole, h.tokenAuth)
+
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	json.NewEncoder(w).Encode(response)
 }
 
 // Sign Up
@@ -74,11 +80,17 @@ func (h *UserHandler) signUp(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.Write([]byte(err.Error()))
-
 		return
 	}
 
-	json.NewEncoder(w).Encode(user)
+	response, err := GenerateToken(user.ID, user.UserRole, h.tokenAuth)
+
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	json.NewEncoder(w).Encode(response)
 }
 
 // Get my profile

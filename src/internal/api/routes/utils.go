@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"shop-api/generated/db"
 	customerrors "shop-api/internal/custom_errors"
@@ -13,8 +14,23 @@ import (
 	"github.com/go-chi/jwtauth"
 )
 
+func GenerateToken(id int64, role db.Role, tokenAuth *jwtauth.JWTAuth) (response TokenDto, err error) {
+	_, response.Token, err = tokenAuth.Encode(map[string]interface{}{
+		"user_id":   id,
+		"user_role": role,
+	})
+
+	return response, err
+}
+
+// Token model
+type TokenDto struct {
+	Token string `json:"token"`
+}
+
 func GetUserId(w http.ResponseWriter, r *http.Request) int64 {
 	_, claims, _ := jwtauth.FromContext(r.Context())
+	log.Println(claims)
 
 	userIdValue, ok := claims["user_id"]
 

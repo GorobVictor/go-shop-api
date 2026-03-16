@@ -19,33 +19,31 @@ func NewUserService(userRepo *repositories.UserRepository) *UserService {
 	return &UserService{userRepo}
 }
 
-func (s *UserService) SignIn(ctx context.Context, model SignInDto, tokenAuth *jwtauth.JWTAuth) (TokenDto, error) {
+func (s *UserService) SignIn(ctx context.Context, model SignInDto, tokenAuth *jwtauth.JWTAuth) (SignInResDto, error) {
 	user, err := s.userRepo.GetUserByEmail(ctx, model.Email)
 
 	if err != nil {
-		return TokenDto{}, err
+		return SignInResDto{}, err
 	}
 
 	if !checkPasswordHash(model.Password, user.PasswordHash) {
 		panic(customerrors.BadRequestError{Message: "incorrect password"})
 	}
 
-	token, err := generateToken(user, tokenAuth)
-
-	return TokenDto{token}, err
+	return NewSignInResDto(user), err
 }
 
-func (s *UserService) SignUp(ctx context.Context, model SignUpDto, tokenAuth *jwtauth.JWTAuth) (TokenDto, error) {
+func (s *UserService) SignUp(ctx context.Context, model SignUpDto, tokenAuth *jwtauth.JWTAuth) (SignInResDto, error) {
 	passHash, err := hashPassword(model.Password)
 
 	if err != nil {
-		return TokenDto{}, err
+		return SignInResDto{}, err
 	}
 
 	err = s.userRepo.AnyEmail(ctx, model.Email)
 
 	if err != nil {
-		return TokenDto{}, err
+		return SignInResDto{}, err
 	}
 
 	user, err := s.userRepo.CreateUser(ctx, db.CreateUserParams{
@@ -53,12 +51,10 @@ func (s *UserService) SignUp(ctx context.Context, model SignUpDto, tokenAuth *jw
 	})
 
 	if err != nil {
-		return TokenDto{}, err
+		return SignInResDto{}, err
 	}
 
-	token, err := generateToken(user, tokenAuth)
-
-	return TokenDto{token}, err
+	return NewSignInResDto(user), err
 }
 
 func (s *UserService) GetProfile(ctx context.Context, id int64) (ProfileDto, error) {
@@ -85,15 +81,6 @@ func (s *UserService) GetUsers(ctx context.Context, limit int32, offset int32) (
 	}
 
 	return result, err
-}
-
-func generateToken(user db.User, tokenAuth *jwtauth.JWTAuth) (token string, err error) {
-	_, token, err = tokenAuth.Encode(map[string]interface{}{
-		"user_id":   user.ID,
-		"user_role": user.UserRole,
-	})
-
-	return token, err
 }
 
 // SignIdDto represents the request body for sign in a user
@@ -126,9 +113,13 @@ type ProfileDto struct {
 	CreatedAt time.Time `json:"createdAt"`
 }
 
-// Token model
-type TokenDto struct {
-	Token string `json:"token"`
+type SignInResDto struct {
+	ID       int64   `json:"id" example:"1"`
+	UserRole db.Role `json:"userRole" example:"member"`
+}
+
+func NewSignInResDto(user db.User) SignInResDto {
+	return SignInResDto{ID: user.ID, UserRole: user.UserRole}
 }
 
 func hashPassword(password string) (string, error) {
