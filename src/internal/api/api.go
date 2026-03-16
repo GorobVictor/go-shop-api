@@ -68,7 +68,7 @@ func Run() {
 		if err != nil {
 			panic(customerrors.NewInternalServerError())
 		}
-		w.Write([]byte("Welcome!"))
+		routes.WriteOkResponse(w, map[string]string{"status": "ok"})
 	})
 
 	userHandler.Users(r)

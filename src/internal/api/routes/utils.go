@@ -2,7 +2,6 @@ package routes
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"shop-api/generated/db"
 	customerrors "shop-api/internal/custom_errors"
@@ -30,7 +29,6 @@ type TokenDto struct {
 
 func GetUserId(w http.ResponseWriter, r *http.Request) int64 {
 	_, claims, _ := jwtauth.FromContext(r.Context())
-	log.Println(claims)
 
 	userIdValue, ok := claims["user_id"]
 
@@ -96,20 +94,17 @@ func GetPanicMiddleware(next http.Handler) http.Handler {
 			if err := recover(); err != nil {
 				switch v := err.(type) {
 				case customerrors.BadRequestError:
-					json.NewEncoder(w).Encode(v)
-					w.WriteHeader(http.StatusBadRequest)
+					WriteError(w, http.StatusBadRequest, &v)
 				case customerrors.UnauthorizedError:
-					json.NewEncoder(w).Encode(v)
-					w.WriteHeader(http.StatusUnauthorized)
+					WriteError(w, http.StatusUnauthorized, &v)
 				case customerrors.ForbiddenError:
-					json.NewEncoder(w).Encode(v)
-					w.WriteHeader(http.StatusForbidden)
+					WriteError(w, http.StatusForbidden, &v)
 				case customerrors.InternalServerError:
-					json.NewEncoder(w).Encode(v)
-					w.WriteHeader(http.StatusInternalServerError)
+					WriteError(w, http.StatusInternalServerError, &v)
+				case *customerrors.InternalServerError:
+					WriteError(w, http.StatusInternalServerError, v)
 				default:
-					json.NewEncoder(w).Encode(customerrors.NewInternalServerError())
-					w.WriteHeader(http.StatusInternalServerError)
+					WriteError(w, http.StatusInternalServerError, customerrors.NewInternalServerError())
 				}
 			}
 		}()
@@ -117,8 +112,14 @@ func GetPanicMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func WriteError(w http.ResponseWriter, statusCode int, err error) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(err)
+}
+
 func ReadBody(w http.ResponseWriter, r *http.Request, v any) {
-	if err := json.NewDecoder(r.Body).Decode(&v); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(v); err != nil {
 		panic(customerrors.BadRequestError{Message: err.Error()})
 	}
 }
@@ -130,4 +131,20 @@ func GetQueryInt32(r *http.Request, name string) int32 {
 		panic(customerrors.BadRequestError{Message: err.Error()})
 	}
 	return int32(value)
+}
+
+func WriteOkResponse(w http.ResponseWriter, data any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if data != nil {
+		json.NewEncoder(w).Encode(data)
+	}
+}
+
+func WriteInternalServerError(w http.ResponseWriter, err error) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusInternalServerError)
+	if err != nil {
+		json.NewEncoder(w).Encode(customerrors.NewInternalServerError())
+	}
 }

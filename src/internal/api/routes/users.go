@@ -2,7 +2,6 @@ package routes
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"shop-api/internal/usecase/user"
 
@@ -52,18 +51,18 @@ func (h *UserHandler) signIn(w http.ResponseWriter, r *http.Request) {
 	user, err := h.userSvc.SignIn(context.Background(), model, h.tokenAuth)
 
 	if err != nil {
-		w.Write([]byte(err.Error()))
+		WriteInternalServerError(w, err)
 		return
 	}
 
 	response, err := GenerateToken(user.ID, user.UserRole, h.tokenAuth)
 
 	if err != nil {
-		w.Write([]byte(err.Error()))
+		WriteInternalServerError(w, err)
 		return
 	}
 
-	json.NewEncoder(w).Encode(response)
+	WriteOkResponse(w, response)
 }
 
 // Sign Up
@@ -79,18 +78,18 @@ func (h *UserHandler) signUp(w http.ResponseWriter, r *http.Request) {
 	user, err := h.userSvc.SignUp(context.Background(), model, h.tokenAuth)
 
 	if err != nil {
-		w.Write([]byte(err.Error()))
+		WriteInternalServerError(w, err)
 		return
 	}
 
 	response, err := GenerateToken(user.ID, user.UserRole, h.tokenAuth)
 
 	if err != nil {
-		w.Write([]byte(err.Error()))
+		WriteInternalServerError(w, err)
 		return
 	}
 
-	json.NewEncoder(w).Encode(response)
+	WriteOkResponse(w, response)
 }
 
 // Get my profile
@@ -105,12 +104,11 @@ func (h *UserHandler) me(w http.ResponseWriter, r *http.Request) {
 	user, err := h.userSvc.GetProfile(context.Background(), userId)
 
 	if err != nil {
-		w.Write([]byte(err.Error()))
-
+		WriteInternalServerError(w, err)
 		return
 	}
 
-	json.NewEncoder(w).Encode(user)
+	WriteOkResponse(w, user)
 }
 
 // Get users
@@ -125,10 +123,9 @@ func (h *UserHandler) getUsers(w http.ResponseWriter, r *http.Request) {
 	result, err := h.userSvc.GetUsers(context.Background(), GetQueryInt32(r, "limit"), GetQueryInt32(r, "offset"))
 
 	if err != nil {
-		w.Write([]byte(err.Error()))
-
+		WriteInternalServerError(w, err)
 		return
 	}
 
-	json.NewEncoder(w).Encode(result)
+	WriteOkResponse(w, result)
 }

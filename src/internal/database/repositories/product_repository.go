@@ -2,9 +2,11 @@ package repositories
 
 import (
 	"context"
+	"errors"
 	"log"
 	"shop-api/generated/db"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -26,7 +28,7 @@ func (r *ProductRepository) GetProducts(ctx context.Context, limit int32, offset
 
 	if err != nil {
 		log.Println(err.Error())
-		if err.Error() == "no rows in result set" {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return products, nil
 		}
 	}
@@ -43,7 +45,7 @@ func (r *ProductRepository) GetProductsByName(ctx context.Context, name string, 
 
 	if err != nil {
 		log.Println(err.Error())
-		if err.Error() == "no rows in result set" {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return products, nil
 		}
 	}

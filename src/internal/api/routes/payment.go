@@ -102,7 +102,7 @@ func (h *PaymentHandler) getReceipts(w http.ResponseWriter, r *http.Request) {
 		panic(customerrors.NewInternalServerError())
 	}
 
-	json.NewEncoder(w).Encode(result)
+	WriteOkResponse(w, result)
 }
 
 func parseSessionId(r *http.Request) string {
@@ -111,10 +111,10 @@ func parseSessionId(r *http.Request) string {
 		panic(customerrors.BadRequestError{Message: "Session ID is required"})
 	}
 
-	if sessionId[0] == '{' {
+	if len(sessionId) > 0 && sessionId[0] == '{' {
 		sessionId = sessionId[1:]
 	}
-	if sessionId[len(sessionId)-1] == '}' {
+	if len(sessionId) > 0 && sessionId[len(sessionId)-1] == '}' {
 		sessionId = sessionId[:len(sessionId)-1]
 	}
 	return sessionId

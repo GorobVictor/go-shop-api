@@ -61,6 +61,10 @@ func (s *UserService) GetProfile(ctx context.Context, id int64) (ProfileDto, err
 
 	user, err := s.userRepo.GetUserProfile(ctx, id)
 
+	if err != nil {
+		return ProfileDto{}, err
+	}
+
 	return ProfileDto{ID: user.ID, FirstName: user.FirstName, LastName: user.LastName, Email: user.Email, UserRole: user.UserRole, CreatedAt: user.CreatedAt.Time}, err
 }
 

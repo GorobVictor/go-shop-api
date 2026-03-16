@@ -2,10 +2,12 @@ package repositories
 
 import (
 	"context"
+	"errors"
 	"log"
 	"shop-api/generated/db"
 	customerrors "shop-api/internal/custom_errors"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -23,7 +25,7 @@ func (r *UserRepository) GetUserProfile(ctx context.Context, id int64) (db.GetUs
 
 	if err != nil {
 		log.Println(err.Error())
-		if err.Error() == "no rows in result set" {
+		if errors.Is(err, pgx.ErrNoRows) {
 			panic(&customerrors.BadRequestError{Message: "wrong user id"})
 		}
 	}
@@ -36,7 +38,7 @@ func (r *UserRepository) GetUsers(ctx context.Context, limit int32, offset int32
 
 	if err != nil {
 		log.Println(err.Error())
-		if err.Error() == "no rows in result set" {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return users, nil
 		}
 	}
@@ -53,7 +55,7 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (db.U
 
 	if err != nil {
 		log.Println(err.Error())
-		if err.Error() == "no rows in result set" {
+		if errors.Is(err, pgx.ErrNoRows) {
 			panic(&customerrors.BadRequestError{Message: "incorrect email"})
 		}
 	}
@@ -62,10 +64,10 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (db.U
 }
 
 func (r *UserRepository) AnyEmail(ctx context.Context, email string) error {
-	email, err := r.q.AnyEmail(ctx, email)
+	_, err := r.q.AnyEmail(ctx, email)
 
 	if err != nil {
-		if err.Error() == "no rows in result set" {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil
 		}
 	}
