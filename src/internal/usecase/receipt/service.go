@@ -81,8 +81,8 @@ func (s *ReceiptService) CreateReceipt(ctx context.Context, userId int64, model 
 
 	for i, product := range products {
 		quantity := model.Products[product.ID]
-		if quantity == 0 {
-			continue
+		if quantity <= 0 {
+			return LinkDto{}, &customerrors.BadRequestError{Message: "quantity must be positive"}
 		}
 		sumPrice += product.Price * int64(quantity)
 		sumDiscount += product.Discount * int64(quantity)
