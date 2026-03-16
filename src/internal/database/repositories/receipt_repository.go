@@ -9,14 +9,14 @@ import (
 
 type ReceiptRepository struct {
 	db *pgxpool.Pool
+	q  *db.Queries
 }
 
-func NewReceiptRepository(db *pgxpool.Pool) *ReceiptRepository {
-	return &ReceiptRepository{db: db}
+func NewReceiptRepository(db *pgxpool.Pool, q *db.Queries) *ReceiptRepository {
+	return &ReceiptRepository{db: db, q: q}
 }
 
 func (r *ReceiptRepository) CreateReceipt(ctx context.Context, receipt db.CreateReceiptParams, products []db.CreateReceiptProductParams) (db.Receipt, []db.ReceiptProduct, error) {
-	q := db.New(r.db)
 	tx, err := r.db.Begin(ctx)
 
 	if err != nil {
@@ -25,7 +25,7 @@ func (r *ReceiptRepository) CreateReceipt(ctx context.Context, receipt db.Create
 
 	defer tx.Rollback(ctx)
 
-	q = q.WithTx(tx)
+	q := r.q.WithTx(tx)
 
 	resReceipt, err := q.CreateReceipt(ctx, receipt)
 
@@ -55,11 +55,9 @@ func (r *ReceiptRepository) CreateReceipt(ctx context.Context, receipt db.Create
 }
 
 func (r *ReceiptRepository) GetReceipts(ctx context.Context, userId int64, limit int32, offset int32) ([]db.GetReceiptsRow, error) {
-	q := db.New(r.db)
-	return q.GetReceipts(ctx, db.GetReceiptsParams{UserID: userId, Limit: limit, Offset: offset})
+	return r.q.GetReceipts(ctx, db.GetReceiptsParams{UserID: userId, Limit: limit, Offset: offset})
 }
 
 func (r *ReceiptRepository) CountReceipts(ctx context.Context, userId int64) (int64, error) {
-	q := db.New(r.db)
-	return q.CountReceipts(ctx, userId)
+	return r.q.CountReceipts(ctx, userId)
 }

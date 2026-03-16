@@ -10,20 +10,19 @@ import (
 
 type ProductRepository struct {
 	db *pgxpool.Pool
+	q  *db.Queries
 }
 
-func NewProductRepository(db *pgxpool.Pool) *ProductRepository {
-	return &ProductRepository{db: db}
+func NewProductRepository(db *pgxpool.Pool, q *db.Queries) *ProductRepository {
+	return &ProductRepository{db: db, q: q}
 }
 
 func (r *ProductRepository) CreateProduct(ctx context.Context, product db.CreateProductParams) (db.Product, error) {
-	q := db.New(r.db)
-	return q.CreateProduct(ctx, product)
+	return r.q.CreateProduct(ctx, product)
 }
 
 func (r *ProductRepository) GetProducts(ctx context.Context, limit int32, offset int32) ([]db.Product, error) {
-	q := db.New(r.db)
-	products, err := q.GetProducts(ctx, db.GetProductsParams{Limit: limit, Offset: offset})
+	products, err := r.q.GetProducts(ctx, db.GetProductsParams{Limit: limit, Offset: offset})
 
 	if err != nil {
 		log.Println(err.Error())
@@ -36,13 +35,11 @@ func (r *ProductRepository) GetProducts(ctx context.Context, limit int32, offset
 }
 
 func (r *ProductRepository) CountProducts(ctx context.Context) (int64, error) {
-	q := db.New(r.db)
-	return q.CountProducts(ctx)
+	return r.q.CountProducts(ctx)
 }
 
 func (r *ProductRepository) GetProductsByName(ctx context.Context, name string, limit int32, offset int32) ([]db.Product, error) {
-	q := db.New(r.db)
-	products, err := q.GetProductsByName(ctx, db.GetProductsByNameParams{Name: name, Limit: limit, Offset: offset})
+	products, err := r.q.GetProductsByName(ctx, db.GetProductsByNameParams{Name: name, Limit: limit, Offset: offset})
 
 	if err != nil {
 		log.Println(err.Error())
@@ -55,16 +52,13 @@ func (r *ProductRepository) GetProductsByName(ctx context.Context, name string, 
 }
 
 func (r *ProductRepository) CountProductsByName(ctx context.Context, name string) (int64, error) {
-	q := db.New(r.db)
-	return q.CountProductsByName(ctx, name)
+	return r.q.CountProductsByName(ctx, name)
 }
 
 func (r *ProductRepository) GetProductByIds(ctx context.Context, ids []int64) ([]db.Product, error) {
-	q := db.New(r.db)
-	return q.GetProductByIds(ctx, ids)
+	return r.q.GetProductByIds(ctx, ids)
 }
 
 func (r *ProductRepository) UpdateReceiptStatus(ctx context.Context, receipt db.UpdateReceiptStatusParams) (db.Receipt, error) {
-	q := db.New(r.db)
-	return q.UpdateReceiptStatus(ctx, receipt)
+	return r.q.UpdateReceiptStatus(ctx, receipt)
 }

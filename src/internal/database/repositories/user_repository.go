@@ -11,15 +11,15 @@ import (
 
 type UserRepository struct {
 	db *pgxpool.Pool
+	q  *db.Queries
 }
 
-func NewUserRepository(db *pgxpool.Pool) *UserRepository {
-	return &UserRepository{db: db}
+func NewUserRepository(db *pgxpool.Pool, q *db.Queries) *UserRepository {
+	return &UserRepository{db: db, q: q}
 }
 
 func (r *UserRepository) GetUserProfile(ctx context.Context, id int64) (db.GetUserProfileRow, error) {
-	q := db.New(r.db)
-	user, err := q.GetUserProfile(ctx, id)
+	user, err := r.q.GetUserProfile(ctx, id)
 
 	if err != nil {
 		log.Println(err.Error())
@@ -32,8 +32,7 @@ func (r *UserRepository) GetUserProfile(ctx context.Context, id int64) (db.GetUs
 }
 
 func (r *UserRepository) GetUsers(ctx context.Context, limit int32, offset int32) ([]db.GetUsersRow, error) {
-	q := db.New(r.db)
-	users, err := q.GetUsers(ctx, db.GetUsersParams{Limit: limit, Offset: offset})
+	users, err := r.q.GetUsers(ctx, db.GetUsersParams{Limit: limit, Offset: offset})
 
 	if err != nil {
 		log.Println(err.Error())
@@ -46,13 +45,11 @@ func (r *UserRepository) GetUsers(ctx context.Context, limit int32, offset int32
 }
 
 func (r *UserRepository) CountUsers(ctx context.Context) (int64, error) {
-	q := db.New(r.db)
-	return q.CountUsers(ctx)
+	return r.q.CountUsers(ctx)
 }
 
 func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (db.User, error) {
-	q := db.New(r.db)
-	user, err := q.GetUserByEmail(ctx, email)
+	user, err := r.q.GetUserByEmail(ctx, email)
 
 	if err != nil {
 		log.Println(err.Error())
@@ -65,8 +62,7 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (db.U
 }
 
 func (r *UserRepository) AnyEmail(ctx context.Context, email string) error {
-	q := db.New(r.db)
-	email, err := q.AnyEmail(ctx, email)
+	email, err := r.q.AnyEmail(ctx, email)
 
 	if err != nil {
 		if err.Error() == "no rows in result set" {
@@ -82,7 +78,5 @@ func (r *UserRepository) AnyEmail(ctx context.Context, email string) error {
 }
 
 func (r *UserRepository) CreateUser(ctx context.Context, user db.CreateUserParams) (db.User, error) {
-	q := db.New(r.db)
-
-	return q.CreateUser(ctx, user)
+	return r.q.CreateUser(ctx, user)
 }

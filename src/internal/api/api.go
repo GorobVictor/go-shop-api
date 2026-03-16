@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"shop-api/generated/db"
 	"shop-api/internal/api/routes"
 	"shop-api/internal/config"
 	customerrors "shop-api/internal/custom_errors"
@@ -33,12 +34,14 @@ func Run() {
 	}
 	defer conn.Close()
 
+	q := db.New(conn)
+
 	tokenAuth := jwtauth.New("HS256", []byte(config.JwtSecret), nil)
 	stripeClient := stripe.NewClient(config.StripeSecret)
 
-	userRepo := repositories.NewUserRepository(conn)
-	productRepo := repositories.NewProductRepository(conn)
-	receiptRepo := repositories.NewReceiptRepository(conn)
+	userRepo := repositories.NewUserRepository(conn, q)
+	productRepo := repositories.NewProductRepository(conn, q)
+	receiptRepo := repositories.NewReceiptRepository(conn, q)
 
 	userSvc := user.NewUserService(userRepo)
 	productSvc := product.NewProductService(productRepo)
