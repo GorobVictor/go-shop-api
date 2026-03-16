@@ -81,6 +81,6 @@ func Run() {
 
 func initSwagger(r *chi.Mux) {
 	r.Get("/swagger/*", httpSwagger.Handler(
-		httpSwagger.URL("http://localhost:3000/swagger/doc.json"),
+		httpSwagger.URL("/swagger/doc.json"),
 	))
 }
